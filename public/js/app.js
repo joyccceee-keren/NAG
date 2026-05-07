@@ -927,9 +927,23 @@ class DoorPilotApp {
           <button id="close-loc-modal" style="background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
         </div>
 
+        <!-- Search box -->
+        <div style="padding:10px 14px 6px;background:#fffbee;border-bottom:1px solid #f0e8c8;position:relative;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input id="loc-search-input" type="text" placeholder="Search your location (e.g. Nagarjuna College...)"
+              style="flex:1;padding:10px 14px;border:1.5px solid #FFB800;border-radius:40px;font-size:14px;outline:none;background:#fff;" />
+            <button id="loc-search-btn" style="padding:10px 16px;background:#FFB800;border:none;border-radius:40px;font-weight:700;font-size:13px;cursor:pointer;">Search</button>
+          </div>
+          <div id="loc-search-results" style="
+            display:none;position:absolute;left:14px;right:14px;top:54px;
+            background:#fff;border:1px solid #e0d8c0;border-radius:12px;
+            box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:100;max-height:200px;overflow-y:auto;
+          "></div>
+        </div>
+
         <!-- Map -->
         <div style="position:relative;">
-          <div id="loc-modal-map" style="height:280px;width:100%;background:#e8e0d8;"></div>
+          <div id="loc-modal-map" style="height:240px;width:100%;background:#e8e0d8;"></div>
           <!-- Loading overlay -->
           <div id="loc-map-loading" style="
             position:absolute;inset:0;background:rgba(255,248,225,0.92);
@@ -1006,8 +1020,95 @@ class DoorPilotApp {
 
     // Recenter button
     document.getElementById('loc-recenter').addEventListener('click', () => {
-      if (modalLat) miniMap.flyTo([modalLat, modalLng], 18, { animate: true, duration: 0.8 });
+      if (modalLat) miniMap.flyTo([modalLat, modalLng], 17, { animate: true, duration: 0.8 });
     });
+
+    // ── Search box ────────────────────────────────────────────────────────
+    const searchInput   = document.getElementById('loc-search-input');
+    const searchBtn     = document.getElementById('loc-search-btn');
+    const searchResults = document.getElementById('loc-search-results');
+
+    const doSearch = async () => {
+      const q = searchInput.value.trim();
+      if (!q) return;
+      searchBtn.textContent = '…';
+      searchResults.style.display = 'none';
+      searchResults.innerHTML = '';
+      try {
+        const r = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&addressdetails=1&countrycodes=in`,
+          { headers: { 'Accept-Language': 'en', 'User-Agent': 'DoorPilot/1.0' } }
+        );
+        const results = await r.json();
+        if (!results.length) {
+          searchResults.innerHTML = '<div style="padding:12px 16px;color:#888;font-size:13px;">No results found</div>';
+          searchResults.style.display = 'block';
+        } else {
+          results.forEach(item => {
+            const div = document.createElement('div');
+            div.style.cssText = 'padding:10px 16px;cursor:pointer;border-bottom:1px solid #f0ece0;font-size:13px;';
+            const name = item.display_name.split(',').slice(0, 3).join(', ');
+            div.textContent = name;
+            div.addEventListener('mouseenter', () => div.style.background = '#fffbee');
+            div.addEventListener('mouseleave', () => div.style.background = '');
+            div.addEventListener('click', () => {
+              const lat = parseFloat(item.lat);
+              const lng = parseFloat(item.lon);
+              modalLat = lat; modalLng = lng;
+
+              // Update marker
+              const youIcon = L.divIcon({
+                className: '',
+                html: `<div style="position:relative;width:22px;height:22px;">
+                  <div style="position:absolute;inset:0;border-radius:50%;background:rgba(66,133,244,0.25);animation:markerPulse 2s infinite;"></div>
+                  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:#4285F4;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(66,133,244,0.6);"></div>
+                </div>`,
+                iconSize: [22, 22], iconAnchor: [11, 11]
+              });
+              if (myMarker) miniMap.removeLayer(myMarker);
+              if (myCircle) { miniMap.removeLayer(myCircle); myCircle = null; }
+              myMarker = L.marker([lat, lng], { icon: youIcon }).addTo(miniMap);
+              miniMap.flyTo([lat, lng], 17, { animate: true, duration: 1 });
+
+              // Update address display
+              const addr = item.address || {};
+              const finalName = item.display_name.split(',')[0].trim();
+              const shortAddr = [
+                addr.road || addr.pedestrian,
+                addr.neighbourhood || addr.suburb || addr.village,
+                addr.city || addr.town || addr.county,
+                addr.state
+              ].filter(Boolean).join(', ');
+              document.getElementById('loc-place-name').textContent = finalName;
+              document.getElementById('loc-modal-address').textContent = shortAddr || item.display_name;
+              document.getElementById('loc-coords').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+              myMarker.bindPopup(`<b>${finalName}</b><br><small>${shortAddr}</small>`, {
+                offset: [0, -12], closeButton: false
+              }).openPopup();
+
+              searchResults.style.display = 'none';
+              searchInput.value = '';
+            });
+            searchResults.appendChild(div);
+          });
+          searchResults.style.display = 'block';
+        }
+      } catch {
+        searchResults.innerHTML = '<div style="padding:12px 16px;color:#c00;font-size:13px;">Search failed, try again</div>';
+        searchResults.style.display = 'block';
+      }
+      searchBtn.textContent = 'Search';
+    };
+
+    searchBtn.addEventListener('click', doSearch);
+    searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
+    // Close results when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!searchResults.contains(e.target) && e.target !== searchInput && e.target !== searchBtn) {
+        searchResults.style.display = 'none';
+      }
+    });
+    // ─────────────────────────────────────────────────────────────────────
 
     // GPS — high accuracy
     if (!navigator.geolocation) {
