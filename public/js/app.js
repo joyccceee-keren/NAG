@@ -101,11 +101,13 @@ class DoorPilotApp {
         await this.loadItems();
         break;
       case 'map':
+        // Destroy old map instance if any, then re-init after container is visible
+        mapManager.destroy();
         setTimeout(() => {
           mapManager.initMap('map', (lat, lng) => {
             this.orderData.mapPin = { latitude: lat, longitude: lng };
           });
-        }, 100);
+        }, 150);
         break;
       case 'voice':
         this.setupVoiceRecording();
@@ -242,19 +244,51 @@ class DoorPilotApp {
             <div class="product-meta">20-30 mins</div>
             <div class="product-footer">
               <span class="product-price">₹${item.price}</span>
-              <button class="product-add-btn" aria-label="Add ${item.name} to cart">ADD</button>
+              <div class="qty-control hidden" id="qty-ctrl-${item.id}">
+                <button class="qty-btn qty-minus" aria-label="Remove one ${item.name}">−</button>
+                <span class="qty-num" id="qty-num-${item.id}">0</span>
+                <button class="qty-btn qty-plus" aria-label="Add one ${item.name}">+</button>
+              </div>
+              <button class="product-add-btn" id="add-btn-${item.id}" aria-label="Add ${item.name} to cart">ADD</button>
             </div>
           </div>
         `;
+
+        // ADD button — show qty controls
         card.querySelector('.product-add-btn').addEventListener('click', (e) => {
           e.stopPropagation();
           this.addToCart(item);
-          // Visual feedback
-          const btn = e.target;
-          btn.textContent = '✓';
-          btn.style.background = '#3A8B39';
-          setTimeout(() => { btn.textContent = 'ADD'; btn.style.background = ''; }, 800);
+          document.getElementById(`add-btn-${item.id}`).classList.add('hidden');
+          document.getElementById(`qty-ctrl-${item.id}`).classList.remove('hidden');
+          document.getElementById(`qty-num-${item.id}`).textContent = this.getItemQty(item.id);
         });
+
+        // + button
+        card.querySelector('.qty-plus').addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.addToCart(item);
+          document.getElementById(`qty-num-${item.id}`).textContent = this.getItemQty(item.id);
+        });
+
+        // - button
+        card.querySelector('.qty-minus').addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.removeFromCart(item.id);
+          const qty = this.getItemQty(item.id);
+          document.getElementById(`qty-num-${item.id}`).textContent = qty;
+          if (qty === 0) {
+            document.getElementById(`add-btn-${item.id}`).classList.remove('hidden');
+            document.getElementById(`qty-ctrl-${item.id}`).classList.add('hidden');
+          }
+        });
+
+        // Restore qty state if item already in cart
+        const existingQty = this.getItemQty(item.id);
+        if (existingQty > 0) {
+          card.querySelector(`#add-btn-${item.id}`).classList.add('hidden');
+          card.querySelector(`#qty-ctrl-${item.id}`).classList.remove('hidden');
+          card.querySelector(`#qty-num-${item.id}`).textContent = existingQty;
+        }
         row.appendChild(card);
       });
 
@@ -281,6 +315,25 @@ class DoorPilotApp {
 
     this.updateCartUI();
     this.saveCart();
+  }
+
+  removeFromCart(itemId) {
+    const existing = this.cart.find(i => i.id === itemId);
+    if (!existing) return;
+
+    if (existing.quantity > 1) {
+      existing.quantity -= 1;
+    } else {
+      this.cart = this.cart.filter(i => i.id !== itemId);
+    }
+
+    this.updateCartUI();
+    this.saveCart();
+  }
+
+  getItemQty(itemId) {
+    const item = this.cart.find(i => i.id === itemId);
+    return item ? item.quantity : 0;
   }
 
   updateCartUI() {
@@ -761,6 +814,11 @@ class DoorPilotApp {
   }
 
   handlePageLoad() {
+    // ── Header 📍 button — show live location in a modal map ──────────────
+    document.getElementById('location-btn').addEventListener('click', () => {
+      this._openLocationModal();
+    });
+
     // Order page events
     document.getElementById('proceed-btn').addEventListener('click', () => {
       this.setupDeliveryDetailsForm();
@@ -772,7 +830,9 @@ class DoorPilotApp {
 
     // Map page events
     document.getElementById('get-current-location').addEventListener('click', () => {
-      mapManager.getCurrentLocation();
+      mapManager.getCurrentLocation((lat, lng) => {
+        this.orderData.mapPin = { latitude: lat, longitude: lng };
+      });
     });
 
     document.getElementById('next-voice-btn').addEventListener('click', () => {
@@ -820,11 +880,283 @@ class DoorPilotApp {
       this.showPage('order');
     });
 
+    // Clear cart button
+    document.getElementById('clear-cart-btn').addEventListener('click', () => {
+      this.cart = [];
+      this.orderData.items = [];
+      // Delete entire IndexedDB to fully wipe cart
+      indexedDB.deleteDatabase('DoorPilot');
+      document.getElementById('cart-count').textContent = '0';
+      document.getElementById('cart-total').textContent = '₹0';
+      document.getElementById('header-cart-count').textContent = '0';
+      document.getElementById('proceed-btn').disabled = true;
+      this.renderCatalog();
+    });
+
     // Handle Find Me page if URL contains token
     if (window.location.pathname.includes('/find-me/')) {
       this.showPage('findme');
     }
   }
+  // ==================== LOCATION MODAL ====================
+  _openLocationModal() {
+    const existing = document.getElementById('location-modal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'location-modal';
+    modal.style.cssText = `
+      position:fixed;inset:0;z-index:10000;
+      background:rgba(10,22,40,0.7);
+      display:flex;align-items:flex-end;justify-content:center;
+    `;
+
+    modal.innerHTML = `
+      <div id="loc-sheet" style="
+        width:100%;max-width:600px;
+        background:#fff;border-radius:24px 24px 0 0;
+        overflow:hidden;
+        box-shadow:0 -8px 40px rgba(0,0,0,0.3);
+        transform:translateY(100%);
+        transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);
+      ">
+        <!-- Header -->
+        <div style="background:#FFB800;padding:14px 18px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">📍</span>
+          <span style="font-weight:700;font-size:16px;flex:1;">Your Exact Location</span>
+          <button id="close-loc-modal" style="background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+
+        <!-- Map -->
+        <div style="position:relative;">
+          <div id="loc-modal-map" style="height:280px;width:100%;background:#e8e0d8;"></div>
+          <!-- Loading overlay -->
+          <div id="loc-map-loading" style="
+            position:absolute;inset:0;background:rgba(255,248,225,0.92);
+            display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+            font-size:14px;color:#555;
+          ">
+            <div style="width:36px;height:36px;border:3px solid #FFB800;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+            <span>Getting your exact location…</span>
+            <span style="font-size:12px;color:#888;">Allow location access if prompted</span>
+          </div>
+          <!-- Recenter button -->
+          <button id="loc-recenter" style="
+            position:absolute;bottom:12px;right:12px;
+            width:40px;height:40px;border:none;border-radius:50%;
+            background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.25);
+            font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+          ">🎯</button>
+        </div>
+
+        <!-- Address card -->
+        <div style="padding:14px 18px 0;">
+          <div id="loc-place-name" style="font-weight:700;font-size:15px;color:#1e1e1e;margin-bottom:4px;">Locating…</div>
+          <div id="loc-modal-address" style="font-size:13px;color:#666;line-height:1.5;margin-bottom:12px;min-height:18px;"></div>
+          <div id="loc-coords" style="font-size:11px;color:#aaa;margin-bottom:14px;font-family:monospace;"></div>
+        </div>
+
+        <!-- Action buttons -->
+        <div style="display:flex;gap:10px;padding:0 18px 20px;">
+          <button id="loc-modal-navigate" style="
+            flex:1;padding:13px 8px;border:none;border-radius:40px;
+            background:#FFB800;color:#1e1e1e;font-weight:700;font-size:14px;cursor:pointer;
+          ">🗺️ Navigate Here</button>
+          <button id="loc-modal-share" style="
+            flex:1;padding:13px 8px;border:none;border-radius:40px;
+            background:#0A2647;color:#fff;font-weight:700;font-size:14px;cursor:pointer;
+          ">🔗 Share Location</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Slide up
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById('loc-sheet').style.transform = 'translateY(0)';
+      });
+    });
+
+    const closeModal = () => {
+      document.getElementById('loc-sheet').style.transform = 'translateY(100%)';
+      setTimeout(() => modal.remove(), 350);
+    };
+
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    document.getElementById('close-loc-modal').addEventListener('click', closeModal);
+
+    let modalLat = null, modalLng = null, miniMap = null, myMarker = null, myCircle = null;
+
+    // Init map immediately at a sensible default, then fly to GPS
+    miniMap = L.map('loc-modal-map', { zoomControl: false, attributionControl: false })
+               .setView([20.5937, 78.9629], 5);
+
+    // Use CartoDB Voyager — clean, detailed street map (same style as the reference image)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      subdomains: 'abcd'
+    }).addTo(miniMap);
+
+    // Zoom controls top-right
+    L.control.zoom({ position: 'topright' }).addTo(miniMap);
+
+    setTimeout(() => miniMap.invalidateSize(), 100);
+
+    // Recenter button
+    document.getElementById('loc-recenter').addEventListener('click', () => {
+      if (modalLat) miniMap.flyTo([modalLat, modalLng], 18, { animate: true, duration: 0.8 });
+    });
+
+    // GPS — high accuracy
+    if (!navigator.geolocation) {
+      document.getElementById('loc-place-name').textContent = 'Geolocation not supported';
+      document.getElementById('loc-map-loading').style.display = 'none';
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        modalLat = pos.coords.latitude;
+        modalLng = pos.coords.longitude;
+        const acc = pos.coords.accuracy;
+
+        // Hide loading overlay
+        document.getElementById('loc-map-loading').style.display = 'none';
+
+        // Show coords immediately
+        document.getElementById('loc-coords').textContent =
+          `${modalLat.toFixed(6)}, ${modalLng.toFixed(6)}  ±${Math.round(acc)}m`;
+
+        // Pulsing "you are here" dot
+        const youIcon = L.divIcon({
+          className: '',
+          html: `
+            <div style="position:relative;width:22px;height:22px;">
+              <div style="
+                position:absolute;inset:0;border-radius:50%;
+                background:rgba(66,133,244,0.25);
+                animation:markerPulse 2s infinite;
+              "></div>
+              <div style="
+                position:absolute;top:50%;left:50%;
+                transform:translate(-50%,-50%);
+                width:14px;height:14px;border-radius:50%;
+                background:#4285F4;border:2.5px solid #fff;
+                box-shadow:0 2px 6px rgba(66,133,244,0.6);
+              "></div>
+            </div>`,
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
+        });
+
+        myMarker = L.marker([modalLat, modalLng], { icon: youIcon }).addTo(miniMap);
+
+        // Accuracy circle
+        myCircle = L.circle([modalLat, modalLng], {
+          radius: acc,
+          color: '#4285F4',
+          fillColor: '#4285F4',
+          fillOpacity: 0.08,
+          weight: 1.5
+        }).addTo(miniMap);
+
+        // Fly to exact location at street level
+        miniMap.flyTo([modalLat, modalLng], 18, { animate: true, duration: 1.2 });
+
+        // Reverse geocode — get place name + full address
+        document.getElementById('loc-place-name').textContent = 'Fetching address…';
+        try {
+          // Use Nominatim directly for richer place data
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${modalLat}&lon=${modalLng}&format=json&zoom=18&addressdetails=1`,
+            { headers: { 'Accept-Language': 'en', 'User-Agent': 'DoorPilot/1.0' } }
+          );
+          const geo = await res.json();
+
+          if (geo && geo.display_name) {
+            const addr = geo.address || {};
+            // Build a human-friendly place name
+            const placeName =
+              addr.amenity || addr.building || addr.college || addr.university ||
+              addr.school || addr.hospital || addr.mall || addr.shop ||
+              addr.road || addr.neighbourhood || addr.suburb || 'Your Location';
+
+            const shortAddr = [
+              addr.road || addr.pedestrian,
+              addr.neighbourhood || addr.suburb,
+              addr.city || addr.town || addr.village,
+              addr.state
+            ].filter(Boolean).join(', ');
+
+            document.getElementById('loc-place-name').textContent = placeName;
+            document.getElementById('loc-modal-address').textContent = shortAddr || geo.display_name;
+
+            // Add a label popup on the marker
+            myMarker.bindPopup(`<b>${placeName}</b><br><small>${shortAddr}</small>`, {
+              offset: [0, -12], closeButton: false
+            }).openPopup();
+          }
+        } catch {
+          // Fallback to our backend
+          try {
+            const res2 = await fetch(`/api/reverse-geocode?lat=${modalLat}&lng=${modalLng}`);
+            const d2   = await res2.json();
+            if (d2.success) {
+              document.getElementById('loc-place-name').textContent = 'Your Location';
+              document.getElementById('loc-modal-address').textContent = d2.address;
+            }
+          } catch { /* silent */ }
+        }
+      },
+      (err) => {
+        document.getElementById('loc-map-loading').style.display = 'none';
+        const msgs = {
+          1: 'Location permission denied.\nPlease allow location in browser settings.',
+          2: 'Location signal unavailable. Try moving to an open area.',
+          3: 'Location request timed out. Try again.'
+        };
+        document.getElementById('loc-place-name').textContent = '⚠️ Location Error';
+        document.getElementById('loc-modal-address').textContent = msgs[err.code] || 'Could not get location';
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+
+    // Navigate button
+    document.getElementById('loc-modal-navigate').addEventListener('click', () => {
+      if (!modalLat) return;
+      const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isAndroid = /Android/.test(navigator.userAgent);
+      let url;
+      if (isIOS)          url = `maps://maps.apple.com/?ll=${modalLat},${modalLng}&q=My+Location`;
+      else if (isAndroid) url = `geo:${modalLat},${modalLng}?q=${modalLat},${modalLng}(My+Location)`;
+      else                url = `https://www.google.com/maps?q=${modalLat},${modalLng}`;
+      window.open(url, '_blank');
+    });
+
+    // Share button
+    document.getElementById('loc-modal-share').addEventListener('click', async () => {
+      if (!modalLat) return;
+      const shareUrl = `https://www.google.com/maps?q=${modalLat},${modalLng}`;
+      const place    = document.getElementById('loc-place-name').textContent;
+      const addr     = document.getElementById('loc-modal-address').textContent;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: place, text: addr, url: shareUrl });
+        } catch { /* cancelled */ }
+      } else {
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          this.showNotification('📋 Location link copied!');
+        } catch {
+          this.showNotification(shareUrl);
+        }
+      }
+    });
+  }
+
 }
 
 // Initialize app when DOM is ready

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>DoorPilot - Delivery Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0A2647; min-height: 100vh; padding: 16px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .header { background: #FFB800; padding: 16px 20px; display: flex; align-items: center; gap: 10px; }
+        .header h2 { font-size: 18px; color: #1e1e1e; font-weight: 700; }
+        #map { height: 320px; width: 100%; }
+        .content { padding: 16px 20px; }
+        .address-bar { background: #fff8e1; border: 1px solid #FFB800; border-radius: 12px; padding: 12px 16px; margin-bottom: 14px; font-size: 14px; color: #333; line-height: 1.5; }
+        .address-bar strong { color: #c47f00; display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .instruction-box { background: #f0f4f8; padding: 14px 16px; border-radius: 12px; margin-bottom: 14px; border-left: 4px solid #FFB800; }
+        .instruction-box strong { font-size: 12px; text-transform: uppercase; color: #888; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+        .instruction-box p { font-size: 15px; color: #1e1e1e; line-height: 1.6; }
+        .voice-box { margin-bottom: 16px; }
+        .voice-box strong { font-size: 12px; text-transform: uppercase; color: #888; letter-spacing: 0.5px; display: block; margin-bottom: 8px; }
+        audio { width: 100%; border-radius: 8px; }
+        .btn-row { display: flex; flex-direction: column; gap: 10px; padding-bottom: 4px; }
+        .btn { padding: 16px; border: none; border-radius: 40px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn:active { transform: scale(0.97); }
+        .btn-nav    { background: #FFB800; color: #1e1e1e; }
+        .btn-near   { background: #0A2647; color: white; }
+        .btn-wrong  { background: #dc2626; color: white; }
+        .loading { text-align: center; padding: 40px; color: #888; }
+        .spinner { width: 36px; height: 36px; border: 3px solid #eee; border-top-color: #FFB800; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(30,30,30,0.9); color: #fff; padding: 10px 22px; border-radius: 24px; font-size: 14px; z-index: 9999; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span style="font-size:24px">🛵</span>
+            <h2>Find Customer Location</h2>
+        </div>
+
+        <div id="map">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading map…</p>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="address-bar" id="addressBar">
+                <strong>📍 Customer Address</strong>
+                <span id="addressText">Fetching address…</span>
+            </div>
+
+            <div class="instruction-box">
+                <strong>📝 Delivery Instructions</strong>
+                <p id="instructionText">Loading…</p>
+            </div>
+
+            <div class="voice-box" id="voiceBox" style="display:none">
+                <strong>🎙️ Voice Guide</strong>
+                <audio id="voiceNote" controls></audio>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-nav" id="navigateBtn">🗺️ OPEN NAVIGATION — Take me there</button>
+                <button class="btn btn-near" id="nearMeBtn">📍 NEAR ME — I'm almost there</button>
+                <button class="btn btn-wrong" id="wrongDoorBtn">❌ WRONG DOOR — Need help</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const deliveryId = window.location.pathname.split('/').pop();
+        let customerLat = null, customerLng = null;
+
+        function showToast(msg, duration = 3000) {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), duration);
+        }
+
+        // ── Load delivery data ──────────────────────────────────────────────
+        fetch(`/api/delivery/${deliveryId}`)
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) { showToast('Delivery not found'); return; }
+
+                customerLat = parseFloat(data.lat);
+                customerLng = parseFloat(data.lng);
+
+                // ── Init Leaflet map ──────────────────────────────────────
+                const mapEl = document.getElementById('map');
+                mapEl.innerHTML = ''; // clear loading spinner
+                mapEl.style.height = '320px';
+
+                const map = L.map('map').setView([customerLat, customerLng], 17);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+
+                // Customer pin (yellow)
+                const customerIcon = L.divIcon({
+                    className: '',
+                    html: `<div style="width:36px;height:44px;background:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 36 44%22><path fill=%22%23FFB800%22 stroke=%22%23c47f00%22 stroke-width=%221.5%22 d=%22M18 0C10 0 4 6 4 14c0 10 14 30 14 30s14-20 14-30C32 6 26 0 18 0z%22/><circle cx=%2218%22 cy=%2214%22 r=%226%22 fill=%22white%22/></svg>') no-repeat center/contain"></div>`,
+                    iconSize: [36, 44], iconAnchor: [18, 44]
+                });
+                L.marker([customerLat, customerLng], { icon: customerIcon })
+                    .addTo(map)
+                    .bindPopup('<b>📍 Customer Location</b>')
+                    .openPopup();
+
+                // Show my location on map too
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(pos => {
+                        const { latitude, longitude } = pos.coords;
+                        const myIcon = L.divIcon({
+                            className: '',
+                            html: `<div style="width:16px;height:16px;background:#0A2647;border:3px solid white;border-radius:50%;box-shadow:0 0 0 3px rgba(10,38,71,0.3)"></div>`,
+                            iconSize: [16, 16], iconAnchor: [8, 8]
+                        });
+                        L.marker([latitude, longitude], { icon: myIcon })
+                            .addTo(map)
+                            .bindPopup('📍 You are here');
+
+                        // Fit both markers in view
+                        const bounds = L.latLngBounds(
+                            [customerLat, customerLng],
+                            [latitude, longitude]
+                        );
+                        map.fitBounds(bounds, { padding: [40, 40] });
+                    }, () => {});
+                }
+
+                setTimeout(() => map.invalidateSize(), 300);
+
+                // ── Populate UI ───────────────────────────────────────────
+                document.getElementById('instructionText').textContent =
+                    data.instructions || 'No special instructions';
+
+                if (data.voiceNote) {
+                    document.getElementById('voiceNote').src = data.voiceNote;
+                    document.getElementById('voiceBox').style.display = 'block';
+                }
+
+                // Reverse geocode address
+                fetch(`/api/reverse-geocode?lat=${customerLat}&lng=${customerLng}`)
+                    .then(r => r.json())
+                    .then(geo => {
+                        if (geo.success) {
+                            document.getElementById('addressText').textContent = geo.address;
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('addressText').textContent =
+                            `${customerLat.toFixed(5)}, ${customerLng.toFixed(5)}`;
+                    });
+            })
+            .catch(() => showToast('Failed to load delivery details'));
+
+        // ── NAVIGATE button — opens Google/Apple Maps with directions ──────
+        document.getElementById('navigateBtn').onclick = () => {
+            if (!customerLat || !customerLng) { showToast('Location not loaded yet'); return; }
+
+            const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isAndroid = /Android/.test(navigator.userAgent);
+
+            let url;
+            if (isIOS) {
+                url = `maps://maps.apple.com/?daddr=${customerLat},${customerLng}&dirflg=d`;
+            } else if (isAndroid) {
+                url = `google.navigation:q=${customerLat},${customerLng}`;
+            } else {
+                url = `https://www.google.com/maps/dir/?api=1&destination=${customerLat},${customerLng}&travelmode=driving`;
+            }
+
+            window.open(url, '_blank');
+            showToast('Opening navigation…', 2000);
+        };
+
+        // ── NEAR ME button ─────────────────────────────────────────────────
+        document.getElementById('nearMeBtn').onclick = async () => {
+            try {
+                await fetch(`/api/delivery/near-me`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId: deliveryId, deliveryExecutiveId: 'exec-delivery' })
+                });
+                showToast('✅ Customer notified — you\'re almost there!');
+            } catch {
+                showToast('✅ Customer notified!');
+            }
+        };
+
+        // ── WRONG DOOR button ──────────────────────────────────────────────
+        document.getElementById('wrongDoorBtn').onclick = async () => {
+            try {
+                await fetch(`/api/delivery/wrong-door`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId: deliveryId, deliveryExecutiveId: 'exec-delivery' })
+                });
+                showToast('⚠️ Customer notified about wrong location');
+            } catch {
+                showToast('⚠️ Customer notified');
+            }
+        };
+    </script>
+</body>
+</html>

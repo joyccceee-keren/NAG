@@ -20,8 +20,7 @@
   
   <!-- Manifest for PWA -->
   <link rel="manifest" href="/manifest.json">
-  <link rel="icon" type="image/png" href="/assets/icon-192.png">
-  <link rel="apple-touch-icon" href="/assets/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
 </head>
 <body>
   <div id="app">
@@ -29,7 +28,41 @@
     <header class="app-header">
       <div class="header-inner container">
         <div class="logo">
-          <img src="/assets/icon-192.png" alt="DoorPilot" class="header-logo"> 
+          <!-- Fast delivery hand + box logo -->
+          <svg class="header-logo" viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" width="42" height="32">
+            <!-- Speed lines -->
+            <line x1="2"  y1="38" x2="28" y2="38" stroke="#0A5470" stroke-width="4.5" stroke-linecap="round"/>
+            <line x1="6"  y1="50" x2="26" y2="50" stroke="#0A5470" stroke-width="4.5" stroke-linecap="round"/>
+            <line x1="2"  y1="62" x2="22" y2="62" stroke="#0A5470" stroke-width="4.5" stroke-linecap="round"/>
+            <line x1="8"  y1="26" x2="24" y2="26" stroke="#0A5470" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="10" y1="74" x2="24" y2="74" stroke="#0A5470" stroke-width="3.5" stroke-linecap="round"/>
+
+            <!-- Hand / fist holding box -->
+            <!-- palm -->
+            <path d="M32 72 Q28 60 32 48 Q36 38 46 36 Q52 34 58 38 L72 30 Q78 26 82 32 L84 36 Q88 30 94 34 L96 40 Q100 36 104 42 L100 58 Q98 68 88 74 L60 80 Q44 82 32 72 Z"
+                  fill="white" stroke="#0A5470" stroke-width="4" stroke-linejoin="round"/>
+            <!-- finger lines -->
+            <path d="M58 38 L56 52" stroke="#0A5470" stroke-width="3" stroke-linecap="round"/>
+            <path d="M72 30 L70 46" stroke="#0A5470" stroke-width="3" stroke-linecap="round"/>
+            <path d="M84 36 L82 50" stroke="#0A5470" stroke-width="3" stroke-linecap="round"/>
+            <path d="M96 40 L94 54" stroke="#0A5470" stroke-width="3" stroke-linecap="round"/>
+            <!-- thumb -->
+            <path d="M32 48 Q24 42 28 34 Q34 26 44 32 L46 36"
+                  fill="white" stroke="#0A5470" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- Package box — top face (yellow) -->
+            <path d="M62 8 L96 18 L84 36 L50 26 Z"
+                  fill="#FFD440" stroke="#0A5470" stroke-width="3.5" stroke-linejoin="round"/>
+            <!-- Package box — right face (orange) -->
+            <path d="M96 18 L104 42 L92 58 L84 36 Z"
+                  fill="#F5A800" stroke="#0A5470" stroke-width="3.5" stroke-linejoin="round"/>
+            <!-- Package box — left face (orange dark) -->
+            <path d="M50 26 L84 36 L92 58 L58 48 Z"
+                  fill="#E8920A" stroke="#0A5470" stroke-width="3.5" stroke-linejoin="round"/>
+            <!-- box tape stripe top -->
+            <line x1="62" y1="8"  x2="84" y2="36" stroke="#0A5470" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
+            <line x1="96" y1="18" x2="50" y2="26" stroke="#0A5470" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
+          </svg>
           <span class="brand">DoorPilot</span>
         </div>
 
@@ -38,7 +71,7 @@
         </div>
 
         <div class="header-actions">
-          <button id="location-btn" class="btn btn-secondary btn-icon" aria-label="Change location">📍</button>
+          <button id="location-btn" class="btn btn-secondary btn-icon" aria-label="Show my location on map" title="My Location">📍</button>
           <button id="cart-btn" class="btn btn-primary btn-icon" aria-label="Open cart">
             🛒 <span class="cart-count" id="header-cart-count">0</span>
           </button>
@@ -56,26 +89,174 @@
       <div class="landing-container">
         <div class="landing-hero">
           <div class="logo-animation">
-            <svg class="doorpilot-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-              <!-- Door icon -->
-              <rect x="40" y="40" width="100" height="120" fill="none" stroke="#0A2647" stroke-width="3" rx="5"/>
-              <!-- Door knob -->
-              <circle cx="125" cy="100" r="8" fill="#0A2647"/>
-              <!-- Pin marker -->
-              <circle cx="100" cy="160" r="12" fill="#FF6B6B" opacity="0" class="pin-drop"/>
+            <svg class="doorpilot-logo" viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
+              <!-- Speed lines -->
+              <line x1="2"  y1="62" x2="42" y2="62" stroke="#0A5470" stroke-width="6" stroke-linecap="round"/>
+              <line x1="6"  y1="78" x2="38" y2="78" stroke="#0A5470" stroke-width="6" stroke-linecap="round"/>
+              <line x1="2"  y1="94" x2="32" y2="94" stroke="#0A5470" stroke-width="6" stroke-linecap="round"/>
+              <line x1="10" y1="46" x2="36" y2="46" stroke="#0A5470" stroke-width="4.5" stroke-linecap="round"/>
+              <line x1="12" y1="110" x2="34" y2="110" stroke="#0A5470" stroke-width="4.5" stroke-linecap="round"/>
+
+              <!-- Hand / fist -->
+              <path d="M46 112 Q40 94 46 76 Q52 60 66 58 Q76 54 84 60 L104 48 Q112 42 118 50 L120 56 Q126 48 134 54 L136 62 Q142 56 148 64 L142 86 Q140 100 126 108 L88 118 Q64 122 46 112 Z"
+                    fill="white" stroke="#0A5470" stroke-width="5.5" stroke-linejoin="round"/>
+              <path d="M84 60 L82 78"  stroke="#0A5470" stroke-width="4" stroke-linecap="round"/>
+              <path d="M104 48 L102 68" stroke="#0A5470" stroke-width="4" stroke-linecap="round"/>
+              <path d="M120 56 L118 74" stroke="#0A5470" stroke-width="4" stroke-linecap="round"/>
+              <path d="M136 62 L134 80" stroke="#0A5470" stroke-width="4" stroke-linecap="round"/>
+              <!-- thumb -->
+              <path d="M46 76 Q36 68 40 56 Q48 44 62 52 L66 58"
+                    fill="white" stroke="#0A5470" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+              <!-- Box top face -->
+              <path d="M88 10 L134 24 L120 56 L74 42 Z"
+                    fill="#FFD440" stroke="#0A5470" stroke-width="5" stroke-linejoin="round"/>
+              <!-- Box right face -->
+              <path d="M134 24 L144 62 L130 82 L120 56 Z"
+                    fill="#F5A800" stroke="#0A5470" stroke-width="5" stroke-linejoin="round"/>
+              <!-- Box left face -->
+              <path d="M74 42 L120 56 L130 82 L84 70 Z"
+                    fill="#E8920A" stroke="#0A5470" stroke-width="5" stroke-linejoin="round"/>
+              <!-- tape -->
+              <line x1="88"  y1="10" x2="120" y2="56" stroke="#0A5470" stroke-width="3" stroke-linecap="round" opacity="0.45"/>
+              <line x1="134" y1="24" x2="74"  y2="42" stroke="#0A5470" stroke-width="3" stroke-linecap="round" opacity="0.45"/>
+
+              <!-- pin drop animation dot -->
+              <circle cx="100" cy="130" r="10" fill="#FF6B6B" opacity="0" class="pin-drop"/>
             </svg>
           </div>
           <h1 class="landing-title">DoorPilot</h1>
           <p class="landing-subtitle">Guide your delivery. Find your door.</p>
           <div class="hero-animation">
             <div class="road"></div>
+            <!-- Delivery scooter SVG illustration -->
             <div class="scooter">
-              <div class="scooter-body"></div>
-              <div class="scooter-head"></div>
-              <div class="scooter-helmet"></div>
-              <div class="scooter-wheel wheel-back"></div>
-              <div class="scooter-wheel wheel-front"></div>
-              <div class="scooter-tail"></div>
+              <svg viewBox="0 0 210 155" xmlns="http://www.w3.org/2000/svg" width="210" height="155">
+
+                <!-- ══ SPEED LINES (behind everything) ══ -->
+                <line x1="0" y1="72" x2="28" y2="72" stroke="#FFB800" stroke-width="2"   opacity="0.55" stroke-dasharray="7 5"/>
+                <line x1="0" y1="82" x2="18" y2="82" stroke="#FFB800" stroke-width="1.5" opacity="0.35" stroke-dasharray="5 6"/>
+                <line x1="0" y1="62" x2="12" y2="62" stroke="#FFB800" stroke-width="1"   opacity="0.25" stroke-dasharray="4 7"/>
+
+                <!-- ══ DELIVERY BOX (rear rack) ══ -->
+                <rect x="10" y="50" width="44" height="38" rx="4" fill="#F5A800" stroke="#c47f00" stroke-width="1.5"/>
+                <rect x="10" y="50" width="44" height="8"  rx="4" fill="#FFD440"/>
+                <line x1="32" y1="50" x2="32" y2="88" stroke="#c47f00" stroke-width="1.2"/>
+                <line x1="10" y1="69" x2="54" y2="69" stroke="#c47f00" stroke-width="1.2"/>
+                <rect x="28" y="66" width="8" height="6" rx="2" fill="#c47f00"/>
+
+                <!-- ══ SCOOTER BODY ══ -->
+                <!-- main chassis -->
+                <path d="M54 93 Q58 68 88 66 L150 66 Q163 66 169 79 L173 93 Z"
+                      fill="#FFB800" stroke="#c47f00" stroke-width="1.5"/>
+                <!-- body highlight -->
+                <path d="M70 70 Q90 64 130 65 L148 66 Q135 62 90 63 Z"
+                      fill="#FFD440" opacity="0.6"/>
+                <!-- seat (rider sits here ~x=100-138) -->
+                <ellipse cx="112" cy="66" rx="26" ry="6" fill="#1e1e1e"/>
+                <!-- front fairing -->
+                <path d="M150 66 Q166 58 173 74 L169 79 Q163 66 150 66 Z"
+                      fill="#FFC820" stroke="#c47f00" stroke-width="1"/>
+                <!-- handlebar STEM — at x=157, from y=44 down to y=68 -->
+                <rect x="154" y="44" width="6" height="24" rx="3" fill="#e8a000" stroke="#c47f00" stroke-width="1"/>
+                <!-- handlebar BAR — horizontal, centred on stem top at y=46 -->
+                <!-- left grip end: x=144,y=46  right grip end: x=170,y=46 -->
+                <rect x="144" y="43" width="26" height="6" rx="3" fill="#1e1e1e"/>
+                <!-- grip rubbers -->
+                <rect x="144" y="43" width="7" height="6" rx="3" fill="#333"/>
+                <rect x="163" y="43" width="7" height="6" rx="3" fill="#333"/>
+                <!-- tail light -->
+                <rect x="54" y="86" width="8" height="5" rx="2" fill="#e53935"/>
+                <!-- front mudguard -->
+                <path d="M160 93 Q167 83 173 93" fill="none" stroke="#c47f00" stroke-width="2"/>
+                <!-- footrest pegs -->
+                <rect x="100" y="90" width="14" height="4" rx="2" fill="#c47f00"/>
+                <rect x="130" y="90" width="14" height="4" rx="2" fill="#c47f00"/>
+
+                <!-- ══ WHEELS ══ -->
+                <!-- rear wheel — centre (80, 112) -->
+                <g class="wheel-spin" style="transform-origin:80px 112px">
+                  <circle cx="80" cy="112" r="21" fill="#1e1e1e" stroke="#444" stroke-width="1.5"/>
+                  <circle cx="80" cy="112" r="15" fill="none" stroke="#777" stroke-width="2"/>
+                  <circle cx="80" cy="112" r="4"  fill="#aaa"/>
+                  <line x1="80" y1="91"  x2="80" y2="133" stroke="#555" stroke-width="1.2"/>
+                  <line x1="59" y1="112" x2="101" y2="112" stroke="#555" stroke-width="1.2"/>
+                  <line x1="65" y1="97"  x2="95"  y2="127" stroke="#555" stroke-width="1.2"/>
+                  <line x1="95" y1="97"  x2="65"  y2="127" stroke="#555" stroke-width="1.2"/>
+                  <circle cx="80" cy="112" r="21" fill="none" stroke="#f0e8d0" stroke-width="2" stroke-dasharray="7 6" opacity="0.35"/>
+                </g>
+                <!-- front wheel — centre (160, 112) -->
+                <g class="wheel-spin" style="transform-origin:160px 112px">
+                  <circle cx="160" cy="112" r="21" fill="#1e1e1e" stroke="#444" stroke-width="1.5"/>
+                  <circle cx="160" cy="112" r="15" fill="none" stroke="#777" stroke-width="2"/>
+                  <circle cx="160" cy="112" r="4"  fill="#aaa"/>
+                  <line x1="160" y1="91"  x2="160" y2="133" stroke="#555" stroke-width="1.2"/>
+                  <line x1="139" y1="112" x2="181" y2="112" stroke="#555" stroke-width="1.2"/>
+                  <line x1="145" y1="97"  x2="175" y2="127" stroke="#555" stroke-width="1.2"/>
+                  <line x1="175" y1="97"  x2="145" y2="127" stroke="#555" stroke-width="1.2"/>
+                  <circle cx="160" cy="112" r="21" fill="none" stroke="#f0e8d0" stroke-width="2" stroke-dasharray="7 6" opacity="0.35"/>
+                </g>
+
+                <!-- ══ RIDER ══
+                     Seated on seat (cx≈112, y=66).
+                     Handlebar grips at x=144 (left) and x=170 (right), y=46.
+                     Both arms reach forward and DOWN to the grips.
+                -->
+
+                <!-- LEGS — bent at knee, feet on footrests -->
+                <!-- left leg: hip→knee→foot -->
+                <path d="M108 66 L104 82 L100 92" stroke="#122a55" stroke-width="9" stroke-linecap="round" fill="none"/>
+                <!-- right leg -->
+                <path d="M120 66 L128 82 L134 92" stroke="#122a55" stroke-width="9" stroke-linecap="round" fill="none"/>
+                <!-- shoes -->
+                <ellipse cx="99"  cy="93" rx="7" ry="4" fill="#1e1e1e"/>
+                <ellipse cx="135" cy="93" rx="7" ry="4" fill="#1e1e1e"/>
+
+                <!-- TORSO — leaning slightly forward toward handlebar -->
+                <!-- hips at (114,66), shoulders at (120,38) — leaning forward -->
+                <path d="M106 66 Q106 52 116 38 L128 38 Q138 52 136 66 Z"
+                      fill="#5b9bd5" stroke="#3a78b5" stroke-width="1.2"/>
+                <!-- jacket collar / chest detail -->
+                <path d="M116 38 L122 50 L128 38" fill="#4a8ac4" stroke="none"/>
+
+                <!-- LEFT ARM — shoulder(108,44) → elbow(100,52) → grip(144,46)
+                     Arm goes forward and slightly up to reach left grip -->
+                <path d="M108 44 Q96 54 100 56 Q118 52 144 46"
+                      stroke="#5b9bd5" stroke-width="7" stroke-linecap="round" fill="none"/>
+                <path d="M108 44 Q96 54 100 56 Q118 52 144 46"
+                      stroke="#3a78b5" stroke-width="1" fill="none"/>
+                <!-- left glove on grip -->
+                <ellipse cx="144" cy="46" rx="6" ry="4" fill="#1a3a6b" stroke="#0d2444" stroke-width="1"/>
+
+                <!-- RIGHT ARM — shoulder(128,44) → elbow(138,50) → grip(170,46)
+                     Arm goes forward to right grip (throttle side) -->
+                <path d="M128 44 Q136 52 140 52 Q155 50 170 46"
+                      stroke="#5b9bd5" stroke-width="7" stroke-linecap="round" fill="none"/>
+                <path d="M128 44 Q136 52 140 52 Q155 50 170 46"
+                      stroke="#3a78b5" stroke-width="1" fill="none"/>
+                <!-- right glove on grip -->
+                <ellipse cx="170" cy="46" rx="6" ry="4" fill="#1a3a6b" stroke="#0d2444" stroke-width="1"/>
+
+                <!-- NECK -->
+                <rect x="119" y="28" width="10" height="11" rx="3" fill="#f5c5a0"/>
+
+                <!-- HEAD -->
+                <ellipse cx="124" cy="21" rx="12" ry="11" fill="#f5c5a0"/>
+
+                <!-- Face mask (lower half of face) -->
+                <path d="M114 22 Q114 30 124 31 Q134 30 134 22" fill="#b0c8e8" opacity="0.9"/>
+
+                <!-- HELMET — covers top & sides of head -->
+                <path d="M112 19 Q112 6 124 5 Q136 6 136 19 Q136 28 124 29 Q112 28 112 19 Z"
+                      fill="#FFB800" stroke="#c47f00" stroke-width="1.5"/>
+                <!-- helmet shine -->
+                <path d="M115 10 Q120 7 128 8" fill="none" stroke="#FFE066" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+                <!-- visor strip -->
+                <path d="M113 20 Q113 26 124 27 Q135 26 135 20" fill="none" stroke="#c47f00" stroke-width="1.2"/>
+                <!-- visor tint -->
+                <path d="M114 19 Q114 25 124 26 Q134 25 134 19" fill="#7ab0d8" opacity="0.45"/>
+
+              </svg>
             </div>
           </div>
         </div>
@@ -106,14 +287,28 @@
           <!-- Items will be loaded here -->
         </div>
 
-        <div class="cart-summary">
+        <div class="cart-summary" id="cart-summary-bar">
           <div class="cart-info">
-            <span>Items in cart: <strong id="cart-count">0</strong></span>
-            <span>Total: <strong id="cart-total">₹0</strong></span>
+            <div class="cart-info-left">
+              <span class="cart-items-label">🛒 <strong id="cart-count">0</strong> items</span>
+              <span class="cart-total-label">Total: <strong id="cart-total">₹0</strong></span>
+            </div>
           </div>
-          <button id="proceed-btn" class="btn btn-primary btn-block" disabled aria-label="Proceed to delivery details">Proceed to Delivery Details</button>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button id="clear-cart-btn" class="btn" style="background:#fff3;color:#fff;border:1px solid #fff5;font-size:12px;padding:8px 12px;border-radius:50px;" aria-label="Clear cart">🗑 Clear</button>
+            <button id="proceed-btn" class="btn btn-primary proceed-btn-mobile" disabled aria-label="Proceed to delivery details">Proceed →</button>
+          </div>
         </div>
       </div>
+    </div>
+
+    <!-- Sticky Cart Bar -->
+    <div id="sticky-cart-bar" style="display:none !important;">
+      <div class="sticky-cart-info">
+        <span class="sticky-cart-count">🛒 <span id="sticky-cart-count">0</span> items</span>
+        <span class="sticky-cart-total">₹<span id="sticky-cart-total">0</span></span>
+      </div>
+      <button class="sticky-proceed-btn" id="sticky-proceed-btn" disabled>Proceed to Delivery →</button>
     </div>
 
     <!-- Delivery Details Page -->
