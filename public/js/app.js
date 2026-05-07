@@ -821,11 +821,10 @@ class DoorPilotApp {
 
     // Order page events
     document.getElementById('proceed-btn').addEventListener('click', () => {
-      this.setupDeliveryDetailsForm();
       this.showPage('delivery-details');
     });
 
-    // Delivery details form setup
+    // Delivery details form setup — only once
     this.setupDeliveryDetailsForm();
 
     // Map page events

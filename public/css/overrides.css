@@ -534,3 +534,127 @@ body,
   border-radius: 6px !important;
   flex-shrink: 0 !important;
 }
+
+/* ==================== DELIVERY DETAILS PAGE — PROFESSIONAL UI ==================== */
+
+#delivery-details-page {
+  background: linear-gradient(160deg, #fffdf5 0%, #fff8e7 100%) !important;
+  min-height: 100vh;
+}
+
+#delivery-details-page .page-header {
+  background: linear-gradient(135deg, #1A1A2E 0%, #16213E 100%);
+  margin: 0 -16px;
+  padding: 32px 24px 24px;
+  color: #fff;
+  border-radius: 0 0 28px 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(26,26,46,0.18);
+}
+
+#delivery-details-page .page-header h1 {
+  color: #fff !important;
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px !important;
+}
+
+#delivery-details-page .page-header p {
+  color: rgba(255,255,255,0.6) !important;
+  font-size: 14px !important;
+}
+
+#delivery-details-page .delivery-form {
+  gap: 14px !important;
+}
+
+#delivery-details-page .form-section {
+  background: #fff !important;
+  border: none !important;
+  border-radius: 20px !important;
+  padding: 22px 20px !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+#delivery-details-page .form-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: linear-gradient(180deg, #FFB800, #F5A623);
+  border-radius: 4px 0 0 4px;
+}
+
+#delivery-details-page .form-section h3 {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1.2px !important;
+  color: #FFB800 !important;
+  margin-bottom: 16px !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#delivery-details-page .form-section input,
+#delivery-details-page .form-section textarea,
+#delivery-details-page .form-section select {
+  background: #f8f9fa !important;
+  border: 1.5px solid #eee !important;
+  border-radius: 12px !important;
+  padding: 13px 16px !important;
+  font-size: 14px !important;
+  color: #1a1a1a !important;
+  margin-bottom: 10px !important;
+  transition: all 0.2s !important;
+}
+
+#delivery-details-page .form-section input:focus,
+#delivery-details-page .form-section textarea:focus {
+  border-color: #FFB800 !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 4px rgba(255,184,0,0.1) !important;
+}
+
+#delivery-details-page .form-section input::placeholder,
+#delivery-details-page .form-section textarea::placeholder {
+  color: #bbb !important;
+  font-size: 13px !important;
+}
+
+#delivery-details-page .checkbox-group label {
+  background: #f8f9fa;
+  border: 1.5px solid #eee;
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: all 0.2s;
+  font-size: 14px !important;
+  color: #333 !important;
+}
+
+#delivery-details-page .checkbox-group label:hover {
+  border-color: #FFB800;
+  background: #fffbee;
+}
+
+#delivery-details-page #next-location-btn {
+  background: linear-gradient(135deg, #FFB800 0%, #F5A623 100%) !important;
+  color: #fff !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  padding: 16px 24px !important;
+  border-radius: 16px !important;
+  border: none !important;
+  box-shadow: 0 6px 20px rgba(255,184,0,0.35) !important;
+  letter-spacing: 0.2px;
+  margin-top: 8px !important;
+}
+
+#delivery-details-page #next-location-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 28px rgba(255,184,0,0.45) !important;
+}
