@@ -319,12 +319,14 @@
           <p>Help us find your door</p>
         </div>
 
-        <form id="delivery-form" class="delivery-form">
+        <form id="delivery-form" class="delivery-form" novalidate>
+
           <div class="form-section">
             <h3>Basic Information</h3>
-          <input type="text" id="apartment-name" placeholder="Apartment or Building name" required>
-          <input type="text" id="colony-name" placeholder="Colony or Society name" required>
-          <input type="text" id="flat-number" placeholder="Flat or Unit number" required>
+            <input type="text" id="apartment-name" placeholder="Apartment or Building name" required>
+            <input type="text" id="colony-name" placeholder="Colony or Society name" required>
+            <input type="text" id="flat-number" placeholder="Flat or Unit number" required>
+          </div>
 
           <div class="form-section">
             <h3>Visual Identification</h3>
@@ -332,12 +334,8 @@
             <input type="text" id="gate-number" placeholder="Gate number">
             <input type="text" id="staircase-color" placeholder="Staircase color (optional)">
             <div class="checkbox-group">
-              <label>
-                <input type="checkbox" id="has-lift"> Has lift/elevator
-              </label>
-              <label>
-                <input type="checkbox" id="is-left-side"> Left side of building (if applicable)
-              </label>
+              <label><input type="checkbox" id="has-lift"> Has lift/elevator</label>
+              <label><input type="checkbox" id="is-left-side"> Left side of building</label>
             </div>
           </div>
 
@@ -350,9 +348,14 @@
 
           <div class="form-section">
             <h3>Contact Information</h3>
-          <input type="text" id="customer-name" placeholder="Your full name" required>
-          <input type="tel" id="customer-phone" placeholder="Your phone number (10 digits)" required>
-          <button type="button" id="next-location-btn" class="btn btn-primary btn-block" aria-label="Set delivery location on map">Next: Set Location on Map</button>
+            <input type="text" id="customer-name" placeholder="Your full name" required>
+            <input type="tel" id="customer-phone" placeholder="Your phone number (10 digits)" required pattern="[0-9+\s\-]{7,15}">
+          </div>
+
+          <button type="button" id="next-location-btn" class="btn btn-primary btn-block" aria-label="Set delivery location on map">
+            Next: Set Location on Map
+          </button>
+
         </form>
       </div>
     </div>

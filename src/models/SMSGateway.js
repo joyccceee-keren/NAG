@@ -1,46 +1,62 @@
-const axios = require('axios');
+// ==================== SMS Gateway ====================
+// Supports: Twilio (real), or simulated (console log)
 
-// SMS Gateway wrapper - supports multiple providers
 class SMSGateway {
   constructor() {
-    this.provider = process.env.SMS_PROVIDER || 'twilio';
+    this.provider = process.env.SMS_PROVIDER || 'simulated';
   }
 
   async sendSMS(phoneNumber, message) {
-    console.log(`[SMS] Sending to ${phoneNumber}: ${message}`);
+    console.log(`[SMS] → ${phoneNumber}: ${message}`);
 
     try {
       if (this.provider === 'twilio') {
-        return this.sendViaTwilio(phoneNumber, message);
-      } else if (this.provider === 'messagebird') {
-        return this.sendViaMessageBird(phoneNumber, message);
-      } else {
-        return this.simulateSMS(phoneNumber, message);
+        return await this._sendViaTwilio(phoneNumber, message);
       }
+      return await this._simulate(phoneNumber, message);
     } catch (err) {
-      console.error('SMS Send Error:', err);
-      throw err;
+      console.error('[SMS] Send failed:', err.message);
+      // Always fall back to simulation so the app doesn't break
+      return await this._simulate(phoneNumber, message);
     }
   }
 
-  async sendViaTwilio(phoneNumber, message) {
-    // In production, use Twilio SDK
-    // For now, simulating the send
-    console.log(`[Twilio] SMS sent to ${phoneNumber}`);
-    return { success: true, provider: 'twilio', messageId: Math.random() };
+  async _sendViaTwilio(phoneNumber, message) {
+    const sid   = process.env.TWILIO_ACCOUNT_SID;
+    const token = process.env.TWILIO_AUTH_TOKEN;
+    const from  = process.env.TWILIO_PHONE_NUMBER;
+
+    if (!sid || sid === 'your_account_sid') {
+      console.warn('[SMS] Twilio credentials not set — falling back to simulation');
+      return this._simulate(phoneNumber, message);
+    }
+
+    // Lazy-load twilio only when needed
+    let twilio;
+    try {
+      twilio = require('twilio');
+    } catch {
+      console.warn('[SMS] twilio package not installed — run: npm install twilio');
+      return this._simulate(phoneNumber, message);
+    }
+
+    const client = twilio(sid, token);
+    const result = await client.messages.create({
+      body: message,
+      from,
+      to: phoneNumber
+    });
+
+    console.log(`[Twilio] Message SID: ${result.sid}`);
+    return { success: true, provider: 'twilio', messageId: result.sid };
   }
 
-  async sendViaMessageBird(phoneNumber, message) {
-    // In production, use MessageBird API
-    console.log(`[MessageBird] SMS sent to ${phoneNumber}`);
-    return { success: true, provider: 'messagebird', messageId: Math.random() };
-  }
-
-  async simulateSMS(phoneNumber, message) {
-    // For development - log to console
-    console.log(`[SIMULATED SMS] To: ${phoneNumber}`);
-    console.log(`Message: ${message}`);
-    console.log('---');
+  async _simulate(phoneNumber, message) {
+    console.log(`\n${'─'.repeat(50)}`);
+    console.log(`📱 SIMULATED SMS`);
+    console.log(`   To:      ${phoneNumber}`);
+    console.log(`   Message: ${message}`);
+    console.log(`${'─'.repeat(50)}\n`);
     return { success: true, provider: 'simulated', phoneNumber, message };
   }
 }

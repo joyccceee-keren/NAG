@@ -1,215 +1,372 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>DoorPilot - Delivery Guide</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0A2647; min-height: 100vh; padding: 16px; }
-        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
-        .header { background: #FFB800; padding: 16px 20px; display: flex; align-items: center; gap: 10px; }
-        .header h2 { font-size: 18px; color: #1e1e1e; font-weight: 700; }
-        #map { height: 320px; width: 100%; }
-        .content { padding: 16px 20px; }
-        .address-bar { background: #fff8e1; border: 1px solid #FFB800; border-radius: 12px; padding: 12px 16px; margin-bottom: 14px; font-size: 14px; color: #333; line-height: 1.5; }
-        .address-bar strong { color: #c47f00; display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .instruction-box { background: #f0f4f8; padding: 14px 16px; border-radius: 12px; margin-bottom: 14px; border-left: 4px solid #FFB800; }
-        .instruction-box strong { font-size: 12px; text-transform: uppercase; color: #888; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
-        .instruction-box p { font-size: 15px; color: #1e1e1e; line-height: 1.6; }
-        .voice-box { margin-bottom: 16px; }
-        .voice-box strong { font-size: 12px; text-transform: uppercase; color: #888; letter-spacing: 0.5px; display: block; margin-bottom: 8px; }
-        audio { width: 100%; border-radius: 8px; }
-        .btn-row { display: flex; flex-direction: column; gap: 10px; padding-bottom: 4px; }
-        .btn { padding: 16px; border: none; border-radius: 40px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn:active { transform: scale(0.97); }
-        .btn-nav    { background: #FFB800; color: #1e1e1e; }
-        .btn-near   { background: #0A2647; color: white; }
-        .btn-wrong  { background: #dc2626; color: white; }
-        .loading { text-align: center; padding: 40px; color: #888; }
-        .spinner { width: 36px; height: 36px; border: 3px solid #eee; border-top-color: #FFB800; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(30,30,30,0.9); color: #fff; padding: 10px 22px; border-radius: 24px; font-size: 14px; z-index: 9999; animation: fadeIn 0.2s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DoorPilot — Delivery Guide</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:#0A2647;min-height:100vh}
+    .container{max-width:600px;margin:0 auto;background:#fff;min-height:100vh;display:flex;flex-direction:column}
+    .header{background:#FFB800;padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .header h2{font-size:17px;font-weight:700;color:#1e1e1e;flex:1}
+    .header .order-id{font-size:11px;color:#5a3e00;font-family:monospace}
+    #map{height:300px;width:100%;flex-shrink:0;background:#e8e0d8}
+    .content{padding:14px 16px;flex:1;overflow-y:auto}
+    .card{background:#fff8e1;border:1px solid #FFB800;border-radius:12px;padding:12px 14px;margin-bottom:12px}
+    .card-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#c47f00;font-weight:700;margin-bottom:6px}
+    .card-value{font-size:14px;color:#1e1e1e;line-height:1.6}
+    .address-text{font-size:13px;color:#555;margin-top:4px;line-height:1.5}
+    audio{width:100%;border-radius:8px;margin-top:6px}
+    .landmark-img{width:100%;border-radius:8px;margin-top:6px;max-height:180px;object-fit:cover}
+    .btn-row{display:flex;flex-direction:column;gap:10px;padding:14px 16px 20px}
+    .btn{padding:15px;border:none;border-radius:40px;font-size:15px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
+    .btn:active{transform:scale(.97)}
+    .btn-nav  {background:#FFB800;color:#1e1e1e}
+    .btn-near {background:#0A2647;color:#fff}
+    .btn-wrong{background:#dc2626;color:#fff}
+    .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;color:#888;font-size:14px}
+    .spinner{width:36px;height:36px;border:3px solid #eee;border-top-color:#FFB800;border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(20,20,20,.9);color:#fff;padding:10px 22px;border-radius:24px;font-size:14px;z-index:9999;white-space:nowrap;animation:fadeUp .2s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+    .error-box{padding:30px 20px;text-align:center;color:#dc2626}
+    .error-box h3{margin-bottom:8px}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <span style="font-size:24px">🛵</span>
-            <h2>Find Customer Location</h2>
-        </div>
+<div class="container">
+  <div class="header">
+    <!-- Delivery guy SVG icon -->
+    <svg width="38" height="48" viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+      <!-- Delivery backpack -->
+      <rect x="44" y="22" width="22" height="28" rx="5" fill="#9b8fe8" stroke="#2d2060" stroke-width="2"/>
+      <line x1="50" y1="26" x2="60" y2="26" stroke="#2d2060" stroke-width="1.5"/>
+      <line x1="50" y1="30" x2="60" y2="30" stroke="#2d2060" stroke-width="1.5"/>
+      <!-- Backpack strap -->
+      <path d="M44 28 Q38 32 40 42" fill="none" stroke="#9b8fe8" stroke-width="3" stroke-linecap="round"/>
 
-        <div id="map">
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>Loading map…</p>
-            </div>
-        </div>
+      <!-- Body / yellow jacket -->
+      <path d="M28 42 Q22 44 20 56 L22 70 L54 70 L56 56 Q54 44 48 42 Z"
+            fill="#FFB800" stroke="#2d2060" stroke-width="2"/>
+      <!-- Jacket collar -->
+      <path d="M34 42 L38 52 L42 42" fill="#e8a000" stroke="none"/>
 
-        <div class="content">
-            <div class="address-bar" id="addressBar">
-                <strong>📍 Customer Address</strong>
-                <span id="addressText">Fetching address…</span>
-            </div>
+      <!-- Left arm (reaching out) -->
+      <path d="M24 48 Q14 52 12 58 L18 60 Q20 56 26 54 Z"
+            fill="#FFB800" stroke="#2d2060" stroke-width="1.8"/>
+      <!-- Left hand -->
+      <ellipse cx="13" cy="59" rx="5" ry="4" fill="#f5c5a0" stroke="#2d2060" stroke-width="1.5"/>
+      <!-- Hand fingers -->
+      <line x1="10" y1="57" x2="8"  y2="55" stroke="#2d2060" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="12" y1="56" x2="11" y2="54" stroke="#2d2060" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="14" y1="56" x2="14" y2="54" stroke="#2d2060" stroke-width="1.2" stroke-linecap="round"/>
 
-            <div class="instruction-box">
-                <strong>📝 Delivery Instructions</strong>
-                <p id="instructionText">Loading…</p>
-            </div>
+      <!-- Right arm (down/pocket) -->
+      <path d="M52 48 Q58 52 56 60 L50 60 Q50 54 48 50 Z"
+            fill="#FFB800" stroke="#2d2060" stroke-width="1.8"/>
 
-            <div class="voice-box" id="voiceBox" style="display:none">
-                <strong>🎙️ Voice Guide</strong>
-                <audio id="voiceNote" controls></audio>
-            </div>
+      <!-- Trousers -->
+      <path d="M22 70 L20 95 L34 95 L38 78 L42 95 L56 95 L54 70 Z"
+            fill="#2d2060" stroke="#1a1040" stroke-width="1.5"/>
+      <!-- Trouser stripe -->
+      <line x1="26" y1="70" x2="24" y2="94" stroke="#FFB800" stroke-width="1.2" opacity="0.6"/>
+      <line x1="50" y1="70" x2="52" y2="94" stroke="#FFB800" stroke-width="1.2" opacity="0.6"/>
 
-            <div class="btn-row">
-                <button class="btn btn-nav" id="navigateBtn">🗺️ OPEN NAVIGATION — Take me there</button>
-                <button class="btn btn-near" id="nearMeBtn">📍 NEAR ME — I'm almost there</button>
-                <button class="btn btn-wrong" id="wrongDoorBtn">❌ WRONG DOOR — Need help</button>
-            </div>
-        </div>
+      <!-- Left shoe -->
+      <ellipse cx="27" cy="96" rx="10" ry="5" fill="#9b8fe8" stroke="#2d2060" stroke-width="1.5"/>
+      <line x1="20" y1="96" x2="22" y2="98" stroke="#2d2060" stroke-width="1.2"/>
+      <line x1="24" y1="97" x2="26" y2="99" stroke="#2d2060" stroke-width="1.2"/>
+      <line x1="28" y1="97" x2="30" y2="99" stroke="#2d2060" stroke-width="1.2"/>
+
+      <!-- Right shoe (raised / walking) -->
+      <path d="M42 90 Q46 86 54 88 L56 94 L44 96 Z"
+            fill="#9b8fe8" stroke="#2d2060" stroke-width="1.5"/>
+      <line x1="46" y1="92" x2="48" y2="95" stroke="#2d2060" stroke-width="1.2"/>
+      <line x1="50" y1="91" x2="52" y2="94" stroke="#2d2060" stroke-width="1.2"/>
+
+      <!-- Neck -->
+      <rect x="35" y="32" width="10" height="12" rx="4" fill="#f5c5a0" stroke="#2d2060" stroke-width="1.5"/>
+
+      <!-- Head -->
+      <ellipse cx="40" cy="24" rx="13" ry="13" fill="#f5c5a0" stroke="#2d2060" stroke-width="2"/>
+      <!-- Smile -->
+      <path d="M35 27 Q40 31 45 27" fill="none" stroke="#2d2060" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Eye -->
+      <ellipse cx="44" cy="22" rx="2" ry="2.5" fill="#2d2060"/>
+      <!-- Cheek blush -->
+      <ellipse cx="46" cy="27" rx="3" ry="2" fill="#f0a0a0" opacity="0.5"/>
+
+      <!-- Cap brim -->
+      <path d="M27 18 Q40 12 53 18 L50 22 Q40 16 30 22 Z"
+            fill="#FFB800" stroke="#2d2060" stroke-width="1.5"/>
+      <!-- Cap top -->
+      <path d="M30 22 Q40 14 50 22 Q48 10 40 8 Q32 10 30 22 Z"
+            fill="#FFB800" stroke="#2d2060" stroke-width="1.5"/>
+      <!-- Cap brim extension -->
+      <path d="M27 18 Q22 19 24 22 L30 22 Z"
+            fill="#e8a000" stroke="#2d2060" stroke-width="1.2"/>
+    </svg>
+    <div style="flex:1">
+      <h2>Delivery Guide</h2>
+      <div class="order-id" id="orderIdDisplay"></div>
     </div>
+  </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        const deliveryId = window.location.pathname.split('/').pop();
-        let customerLat = null, customerLng = null;
+  <!-- Map -->
+  <div id="map">
+    <div class="loading">
+      <div class="spinner"></div>
+      <span>Loading delivery location…</span>
+    </div>
+  </div>
 
-        function showToast(msg, duration = 3000) {
-            const t = document.createElement('div');
-            t.className = 'toast';
-            t.textContent = msg;
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), duration);
-        }
+  <!-- Content -->
+  <div class="content" id="content">
+    <div class="loading">
+      <div class="spinner"></div>
+      <span>Fetching order details…</span>
+    </div>
+  </div>
 
-        // ── Load delivery data ──────────────────────────────────────────────
-        fetch(`/api/delivery/${deliveryId}`)
-            .then(r => r.json())
-            .then(data => {
-                if (!data.success) { showToast('Delivery not found'); return; }
+  <!-- Action buttons -->
+  <div class="btn-row">
+    <button class="btn btn-nav"   id="navigateBtn" disabled>🗺️ OPEN NAVIGATION — Take me there</button>
+    <button class="btn btn-near"  id="nearMeBtn"   disabled>📍 NEAR ME — I'm almost there</button>
+    <button class="btn btn-wrong" id="wrongDoorBtn"disabled>❌ WRONG DOOR — Need help</button>
+  </div>
+</div>
 
-                customerLat = parseFloat(data.lat);
-                customerLng = parseFloat(data.lng);
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function showToast(msg, duration = 3000) {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), duration);
+}
 
-                // ── Init Leaflet map ──────────────────────────────────────
-                const mapEl = document.getElementById('map');
-                mapEl.innerHTML = ''; // clear loading spinner
-                mapEl.style.height = '320px';
+function enableButtons() {
+  ['navigateBtn','nearMeBtn','wrongDoorBtn'].forEach(id => {
+    document.getElementById(id).disabled = false;
+  });
+}
 
-                const map = L.map('map').setView([customerLat, customerLng], 17);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors',
-                    maxZoom: 19
-                }).addTo(map);
+// ── Parse URL ────────────────────────────────────────────────────────────────
+const pathParts = window.location.pathname.split('/').filter(Boolean);
+const orderId   = pathParts[pathParts.length - 1]; // /delivery/:orderId
+const token     = new URLSearchParams(window.location.search).get('token');
 
-                // Customer pin (yellow)
-                const customerIcon = L.divIcon({
-                    className: '',
-                    html: `<div style="width:36px;height:44px;background:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 36 44%22><path fill=%22%23FFB800%22 stroke=%22%23c47f00%22 stroke-width=%221.5%22 d=%22M18 0C10 0 4 6 4 14c0 10 14 30 14 30s14-20 14-30C32 6 26 0 18 0z%22/><circle cx=%2218%22 cy=%2214%22 r=%226%22 fill=%22white%22/></svg>') no-repeat center/contain"></div>`,
-                    iconSize: [36, 44], iconAnchor: [18, 44]
-                });
-                L.marker([customerLat, customerLng], { icon: customerIcon })
-                    .addTo(map)
-                    .bindPopup('<b>📍 Customer Location</b>')
-                    .openPopup();
+let customerLat = null, customerLng = null, orderData = null;
 
-                // Show my location on map too
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(pos => {
-                        const { latitude, longitude } = pos.coords;
-                        const myIcon = L.divIcon({
-                            className: '',
-                            html: `<div style="width:16px;height:16px;background:#0A2647;border:3px solid white;border-radius:50%;box-shadow:0 0 0 3px rgba(10,38,71,0.3)"></div>`,
-                            iconSize: [16, 16], iconAnchor: [8, 8]
-                        });
-                        L.marker([latitude, longitude], { icon: myIcon })
-                            .addTo(map)
-                            .bindPopup('📍 You are here');
+// ── Load order data ──────────────────────────────────────────────────────────
+async function loadOrder() {
+  try {
+    // Try token-based lookup first (from SMS link), then direct orderId
+    let data = null;
 
-                        // Fit both markers in view
-                        const bounds = L.latLngBounds(
-                            [customerLat, customerLng],
-                            [latitude, longitude]
-                        );
-                        map.fitBounds(bounds, { padding: [40, 40] });
-                    }, () => {});
-                }
+    if (token) {
+      const r = await fetch(`/api/orders/token/${token}`);
+      if (r.ok) data = await r.json();
+    }
 
-                setTimeout(() => map.invalidateSize(), 300);
-
-                // ── Populate UI ───────────────────────────────────────────
-                document.getElementById('instructionText').textContent =
-                    data.instructions || 'No special instructions';
-
-                if (data.voiceNote) {
-                    document.getElementById('voiceNote').src = data.voiceNote;
-                    document.getElementById('voiceBox').style.display = 'block';
-                }
-
-                // Reverse geocode address
-                fetch(`/api/reverse-geocode?lat=${customerLat}&lng=${customerLng}`)
-                    .then(r => r.json())
-                    .then(geo => {
-                        if (geo.success) {
-                            document.getElementById('addressText').textContent = geo.address;
-                        }
-                    })
-                    .catch(() => {
-                        document.getElementById('addressText').textContent =
-                            `${customerLat.toFixed(5)}, ${customerLng.toFixed(5)}`;
-                    });
-            })
-            .catch(() => showToast('Failed to load delivery details'));
-
-        // ── NAVIGATE button — opens Google/Apple Maps with directions ──────
-        document.getElementById('navigateBtn').onclick = () => {
-            if (!customerLat || !customerLng) { showToast('Location not loaded yet'); return; }
-
-            const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            const isAndroid = /Android/.test(navigator.userAgent);
-
-            let url;
-            if (isIOS) {
-                url = `maps://maps.apple.com/?daddr=${customerLat},${customerLng}&dirflg=d`;
-            } else if (isAndroid) {
-                url = `google.navigation:q=${customerLat},${customerLng}`;
-            } else {
-                url = `https://www.google.com/maps/dir/?api=1&destination=${customerLat},${customerLng}&travelmode=driving`;
-            }
-
-            window.open(url, '_blank');
-            showToast('Opening navigation…', 2000);
+    if (!data || !data.success) {
+      const r = await fetch(`/api/orders/${orderId}`);
+      if (r.ok) {
+        const raw = await r.json();
+        // Normalise to the same shape as getOrderByToken
+        data = {
+          success:          true,
+          orderId:          raw.id,
+          customerName:     raw.customerName,
+          deliveryDetails:  raw.deliveryDetails,
+          mapPin:           raw.mapPin,
+          voiceNoteUrl:     raw.voiceNoteUrl,
+          landmarkImageUrl: raw.landmarkImageUrl,
+          textInstruction:  raw.textInstruction,
+          status:           raw.status
         };
+      }
+    }
 
-        // ── NEAR ME button ─────────────────────────────────────────────────
-        document.getElementById('nearMeBtn').onclick = async () => {
-            try {
-                await fetch(`/api/delivery/near-me`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderId: deliveryId, deliveryExecutiveId: 'exec-delivery' })
-                });
-                showToast('✅ Customer notified — you\'re almost there!');
-            } catch {
-                showToast('✅ Customer notified!');
-            }
-        };
+    if (!data || !data.success || !data.mapPin) {
+      document.getElementById('content').innerHTML = `
+        <div class="error-box">
+          <h3>⚠️ Order Not Found</h3>
+          <p>This delivery link may be invalid or expired.</p>
+        </div>`;
+      document.getElementById('map').innerHTML = '';
+      return;
+    }
 
-        // ── WRONG DOOR button ──────────────────────────────────────────────
-        document.getElementById('wrongDoorBtn').onclick = async () => {
-            try {
-                await fetch(`/api/delivery/wrong-door`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderId: deliveryId, deliveryExecutiveId: 'exec-delivery' })
-                });
-                showToast('⚠️ Customer notified about wrong location');
-            } catch {
-                showToast('⚠️ Customer notified');
-            }
-        };
-    </script>
+    orderData = data;
+    renderOrder(data);
+  } catch (err) {
+    console.error('loadOrder error:', err);
+    document.getElementById('content').innerHTML = `
+      <div class="error-box"><h3>⚠️ Failed to load order</h3><p>${err.message}</p></div>`;
+  }
+}
+
+// ── Render order details ─────────────────────────────────────────────────────
+function renderOrder(data) {
+  customerLat = parseFloat(data.mapPin.latitude);
+  customerLng = parseFloat(data.mapPin.longitude);
+
+  // Order ID badge
+  document.getElementById('orderIdDisplay').textContent =
+    `Order #${(data.orderId || orderId).substring(0,8).toUpperCase()}`;
+
+  // ── Map ──────────────────────────────────────────────────────────────────
+  const mapEl = document.getElementById('map');
+  mapEl.innerHTML = '';
+  mapEl.style.height = '300px';
+
+  const map = L.map('map', { maxZoom: 20 }).setView([customerLat, customerLng], 17);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 20, maxNativeZoom: 19
+  }).addTo(map);
+
+  // Customer pin
+  const custIcon = L.divIcon({
+    className: '',
+    html: `<div style="width:36px;height:44px;background:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 36 44%22><path fill=%22%23FFB800%22 stroke=%22%23c47f00%22 stroke-width=%221.5%22 d=%22M18 0C10 0 4 6 4 14c0 10 14 30 14 30s14-20 14-30C32 6 26 0 18 0z%22/><circle cx=%2218%22 cy=%2214%22 r=%226%22 fill=%22white%22/></svg>') no-repeat center/contain"></div>`,
+    iconSize:[36,44], iconAnchor:[18,44]
+  });
+  L.marker([customerLat, customerLng], { icon: custIcon })
+    .addTo(map)
+    .bindPopup(`<b>📍 ${data.customerName || 'Customer'}</b>`)
+    .openPopup();
+
+  // My location
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      const { latitude: myLat, longitude: myLng } = pos.coords;
+      const myIcon = L.divIcon({
+        className: '',
+        html: `<div style="width:16px;height:16px;background:#4285F4;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(66,133,244,.3)"></div>`,
+        iconSize:[16,16], iconAnchor:[8,8]
+      });
+      L.marker([myLat, myLng], { icon: myIcon }).addTo(map).bindPopup('📍 You');
+
+      // Draw dashed line between me and customer
+      L.polyline([[myLat, myLng],[customerLat, customerLng]], {
+        color: '#FFB800', weight: 2, dashArray: '8 6', opacity: 0.8
+      }).addTo(map);
+
+      // Fit both in view
+      map.fitBounds([[customerLat, customerLng],[myLat, myLng]], { padding: [40,40] });
+    }, () => {});
+  }
+
+  setTimeout(() => map.invalidateSize(), 300);
+
+  // ── Content cards ────────────────────────────────────────────────────────
+  const details = data.deliveryDetails || {};
+  const addrParts = [
+    details.flatNumber   && `Flat ${details.flatNumber}`,
+    details.apartmentName,
+    details.colonyName,
+    details.flatColor    && `Door: ${details.flatColor}`,
+    details.floorNumber  && `Floor ${details.floorNumber}`,
+    details.hasLift      && 'Has lift',
+    details.gateNumber   && `Gate ${details.gateNumber}`,
+    details.intercomCode && `Intercom: ${details.intercomCode}`,
+    details.specialIdentifiers
+  ].filter(Boolean);
+
+  let html = '';
+
+  // Address card
+  html += `
+    <div class="card">
+      <div class="card-label">📍 Delivery Address</div>
+      <div class="card-value">${addrParts.join(' • ') || 'See map above'}</div>
+      <div class="address-text" id="reverseAddr">Fetching address…</div>
+    </div>`;
+
+  // Instructions
+  if (data.textInstruction) {
+    html += `
+      <div class="card">
+        <div class="card-label">📝 Instructions</div>
+        <div class="card-value">${data.textInstruction}</div>
+      </div>`;
+  }
+
+  // Voice note
+  if (data.voiceNoteUrl) {
+    html += `
+      <div class="card">
+        <div class="card-label">🎙️ Voice Guide</div>
+        <audio controls src="${data.voiceNoteUrl}"></audio>
+      </div>`;
+  }
+
+  // Landmark image
+  if (data.landmarkImageUrl) {
+    html += `
+      <div class="card">
+        <div class="card-label">🏠 Landmark Photo</div>
+        <img class="landmark-img" src="${data.landmarkImageUrl}" alt="Landmark">
+      </div>`;
+  }
+
+  document.getElementById('content').innerHTML = html;
+
+  // Reverse geocode
+  fetch(`/api/reverse-geocode?lat=${customerLat}&lng=${customerLng}`)
+    .then(r => r.json())
+    .then(d => {
+      const el = document.getElementById('reverseAddr');
+      if (el && d.success) el.textContent = d.address;
+    }).catch(() => {});
+
+  enableButtons();
+}
+
+// ── Button handlers ──────────────────────────────────────────────────────────
+document.getElementById('navigateBtn').addEventListener('click', () => {
+  if (!customerLat) return;
+  const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+  let url;
+  if (isIOS)          url = `maps://maps.apple.com/?daddr=${customerLat},${customerLng}&dirflg=d`;
+  else if (isAndroid) url = `google.navigation:q=${customerLat},${customerLng}`;
+  else                url = `https://www.google.com/maps/dir/?api=1&destination=${customerLat},${customerLng}&travelmode=driving`;
+  window.open(url, '_blank');
+  showToast('Opening navigation…', 2000);
+});
+
+document.getElementById('nearMeBtn').addEventListener('click', async () => {
+  try {
+    await fetch('/api/delivery/near-me', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: orderData?.orderId || orderId, deliveryExecutiveId: 'exec-delivery' })
+    });
+    showToast('✅ Customer notified — you\'re almost there!');
+  } catch { showToast('✅ Notification sent'); }
+});
+
+document.getElementById('wrongDoorBtn').addEventListener('click', async () => {
+  try {
+    await fetch('/api/delivery/wrong-door', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: orderData?.orderId || orderId, deliveryExecutiveId: 'exec-delivery' })
+    });
+    showToast('⚠️ Customer notified about wrong location');
+  } catch { showToast('⚠️ Notification sent'); }
+});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+loadOrder();
+</script>
 </body>
 </html>

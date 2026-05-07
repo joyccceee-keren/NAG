@@ -114,21 +114,23 @@ class APIClient {
   async uploadFile(endpoint, blob, fieldName) {
     const url = `${this.baseURL}/api${endpoint}`;
     const formData = new FormData();
-    formData.append(fieldName, blob);
+
+    // Give the blob a proper filename with extension so multer accepts it
+    const ext      = blob.type ? '.' + blob.type.split('/')[1].split(';')[0] : '.webm';
+    const filename = `${fieldName}-${Date.now()}${ext}`;
+    formData.append(fieldName, blob, filename);
 
     try {
       const response = await Promise.race([
-        fetch(url, {
-          method: 'POST',
-          body: formData
-        }),
+        fetch(url, { method: 'POST', body: formData }),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Upload timeout')), 30000)
         )
       ]);
 
       if (!response.ok) {
-        throw new Error(`Upload Error: ${response.status}`);
+        const errText = await response.text();
+        throw new Error(`Upload Error ${response.status}: ${errText}`);
       }
 
       return await response.json();
