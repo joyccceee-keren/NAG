@@ -78,40 +78,59 @@ class MapManager {
       return;
     }
 
-    this._showToast('📍 Getting your location…', 2000);
+    this._showToast('📍 Getting your location…', 3000);
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude, accuracy } = pos.coords;
+    // Try high-accuracy first, fall back to low-accuracy if it fails/times out
+    const tryLocate = (highAccuracy, attempt) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude, accuracy } = pos.coords;
+          console.log(`GPS fix (highAccuracy=${highAccuracy}): ${latitude}, ${longitude} ±${Math.round(accuracy)}m`);
 
-        this.setMarker(latitude, longitude, 'You are here');
+          this.setMarker(latitude, longitude, `📍 You are here (±${Math.round(accuracy)}m)`);
 
-        // Show accuracy circle
-        if (this.accuracyCircle) this.map.removeLayer(this.accuracyCircle);
-        this.accuracyCircle = L.circle([latitude, longitude], {
-          radius: accuracy,
-          color: '#FFB800',
-          fillColor: '#FFD440',
-          fillOpacity: 0.15,
-          weight: 1
-        }).addTo(this.map);
+          // Show accuracy circle
+          if (this.accuracyCircle) this.map.removeLayer(this.accuracyCircle);
+          this.accuracyCircle = L.circle([latitude, longitude], {
+            radius: accuracy,
+            color: '#FFB800',
+            fillColor: '#FFD440',
+            fillOpacity: 0.15,
+            weight: 1
+          }).addTo(this.map);
 
-        if (onMarkerMove) onMarkerMove(latitude, longitude);
+          if (onMarkerMove) onMarkerMove(latitude, longitude);
+          this._reverseGeocode(latitude, longitude);
 
-        // Reverse geocode to show address
-        this._reverseGeocode(latitude, longitude);
-      },
-      (err) => {
-        console.error('Geolocation error:', err);
-        const msgs = {
-          1: 'Location permission denied. Please allow location access.',
-          2: 'Location unavailable. Try again.',
-          3: 'Location request timed out.'
-        };
-        this._showToast(msgs[err.code] || 'Could not get location');
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+          // If accuracy is poor (>500m) and we haven't tried low-accuracy yet, warn
+          if (accuracy > 500) {
+            this._showToast(`⚠️ Low accuracy: ±${Math.round(accuracy)}m. Try on a phone for better results.`, 5000);
+          }
+        },
+        (err) => {
+          console.error(`Geolocation error (attempt ${attempt}):`, err.code, err.message);
+          if (highAccuracy && attempt === 1) {
+            // Retry with low accuracy
+            this._showToast('Retrying with network location…', 2000);
+            tryLocate(false, 2);
+          } else {
+            const msgs = {
+              1: '❌ Location permission denied.\n\nFix: Click the 🔒 icon in your browser address bar → Site settings → Location → Allow',
+              2: '⚠️ Location signal unavailable. Move to an open area or try on a phone.',
+              3: '⏱️ Location timed out. Check your browser allows location for this site.'
+            };
+            this._showToast(msgs[err.code] || 'Could not get location', 6000);
+          }
+        },
+        {
+          enableHighAccuracy: highAccuracy,
+          timeout: highAccuracy ? 8000 : 15000,
+          maximumAge: 30000  // allow 30s cached fix — more reliable on laptops
+        }
+      );
+    };
+
+    tryLocate(true, 1);
   }
 
   // ── Reverse geocode lat/lng → address string ────────────────────────────

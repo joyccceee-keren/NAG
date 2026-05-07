@@ -260,41 +260,69 @@ class DoorPilotApp {
 
   // ==================== DELIVERY DETAILS ====================
   setupDeliveryDetailsForm() {
-    const form = document.getElementById('delivery-form');
+    const btn = document.getElementById('next-location-btn');
+    if (!btn || btn._bound) return;
+    btn._bound = true;
 
-    document.getElementById('next-location-btn').addEventListener('click', (e) => {
-      e.preventDefault();
+    btn.addEventListener('click', () => {
+      // Safe value helper
+      const val = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+      const chk = (id) => { const el = document.getElementById(id); return el ? el.checked : false; };
 
-      // Validate form
-      if (!form.checkValidity()) {
-        alert('Please fill all required fields');
-        return;
+      // Manual required field check
+      const required = [
+        { id: 'apartment-name', label: 'Apartment/Building name' },
+        { id: 'colony-name',    label: 'Colony/Society name' },
+        { id: 'flat-number',    label: 'Flat/Unit number' },
+        { id: 'customer-name',  label: 'Your full name' },
+        { id: 'customer-phone', label: 'Phone number' }
+      ];
+
+      for (const f of required) {
+        if (!val(f.id)) {
+          const el = document.getElementById(f.id);
+          if (el) { el.focus(); el.style.borderColor = '#dc2626'; }
+          this._showFieldError(f.id, `${f.label} is required`);
+          return;
+        }
+        // Reset border
+        const el = document.getElementById(f.id);
+        if (el) el.style.borderColor = '';
       }
 
-      // Collect form data
       this.orderData.deliveryDetails = {
-        apartmentName: document.getElementById('apartment-name').value,
-        colonyName: document.getElementById('colony-name').value,
-        flatNumber: document.getElementById('flat-number').value,
-        houseNumber: document.getElementById('house-number').value,
-        flatColor: document.getElementById('flat-color').value,
-        gateNumber: document.getElementById('gate-number').value,
-        staircaseColor: document.getElementById('staircase-color').value,
-        hasLift: document.getElementById('has-lift').checked,
-        isLeftSide: document.getElementById('is-left-side').checked,
-        floorNumber: document.getElementById('floor-number').value,
-        intercomCode: document.getElementById('intercom-code').value,
-        specialIdentifiers: document.getElementById('special-identifiers').value
+        apartmentName:      val('apartment-name'),
+        colonyName:         val('colony-name'),
+        flatNumber:         val('flat-number'),
+        flatColor:          val('flat-color'),
+        gateNumber:         val('gate-number'),
+        staircaseColor:     val('staircase-color'),
+        hasLift:            chk('has-lift'),
+        isLeftSide:         chk('is-left-side'),
+        floorNumber:        val('floor-number'),
+        intercomCode:       val('intercom-code'),
+        specialIdentifiers: val('special-identifiers')
       };
 
-      this.orderData.customerName = document.getElementById('customer-name').value;
-      this.orderData.customerPhone = document.getElementById('customer-phone').value;
+      this.orderData.customerName  = val('customer-name');
+      this.orderData.customerPhone = val('customer-phone');
 
-      // Save draft
       this.saveDraft();
-
       this.showPage('map');
     });
+  }
+
+  _showFieldError(id, msg) {
+    const existing = document.getElementById('field-error-' + id);
+    if (existing) existing.remove();
+    const el = document.getElementById(id);
+    if (!el) return;
+    const err = document.createElement('div');
+    err.id = 'field-error-' + id;
+    err.style.cssText = 'color:#dc2626;font-size:12px;margin:-8px 0 8px 4px;';
+    err.textContent = '⚠ ' + msg;
+    el.insertAdjacentElement('afterend', err);
+    setTimeout(() => err.remove(), 3000);
   }
 
   // ==================== VOICE & LANDMARKS ====================
@@ -356,24 +384,27 @@ class DoorPilotApp {
   stopVoiceRecording() {
     clearInterval(this.recordingInterval);
 
-    this.voiceBlob = voiceRecorder.stopRecording();
-    voiceRecorder.clearRecording();
+    // stopRecording() now returns a Promise<Blob>
+    voiceRecorder.stopRecording().then((blob) => {
+      if (!blob) return;
+      this.voiceBlob = blob;
 
-    document.getElementById('start-recording').classList.remove('hidden');
-    document.getElementById('stop-recording').classList.add('hidden');
-    document.getElementById('recording-time').classList.add('hidden');
+      document.getElementById('start-recording').classList.remove('hidden');
+      document.getElementById('stop-recording').classList.add('hidden');
+      document.getElementById('recording-time').classList.add('hidden');
 
-    // Show playback
-    const audio = voiceRecorder.createAudioElement(this.voiceBlob);
-    const playback = document.getElementById('voice-playback');
-    playback.innerHTML = '';
-    playback.appendChild(audio);
-    playback.innerHTML += '<button id="re-record-btn" class="btn btn-secondary">Re-record</button>';
-    playback.classList.remove('hidden');
-
-    // Re-attach event listener
-    document.getElementById('re-record-btn').addEventListener('click', () => {
-      this.resetVoiceRecording();
+      // Show playback
+      const playback = document.getElementById('voice-playback');
+      playback.innerHTML = '';
+      const audio = voiceRecorder.createAudioElement(blob);
+      if (audio) playback.appendChild(audio);
+      const reRecordBtn = document.createElement('button');
+      reRecordBtn.id = 're-record-btn';
+      reRecordBtn.className = 'btn btn-secondary';
+      reRecordBtn.textContent = 'Re-record';
+      reRecordBtn.addEventListener('click', () => this.resetVoiceRecording());
+      playback.appendChild(reRecordBtn);
+      playback.classList.remove('hidden');
     });
   }
 
@@ -423,74 +454,110 @@ class DoorPilotApp {
   async confirmAndPlaceOrder() {
     try {
       document.getElementById('confirm-order-btn').disabled = true;
-
-      // Show processing
       this.showPage('processing');
+      document.getElementById('processing-status').textContent = 'Uploading files…';
 
-      // Upload voice and landmark
+      // Upload voice note
       if (this.voiceBlob) {
-        const voiceResult = await api.uploadVoice(this.voiceBlob);
-        this.orderData.voiceNoteUrl = voiceResult.url;
+        try {
+          const voiceResult = await api.uploadVoice(this.voiceBlob);
+          this.orderData.voiceNoteUrl = voiceResult.url;
+          console.log('✅ Voice uploaded:', voiceResult.url);
+        } catch (e) {
+          console.warn('Voice upload failed (non-fatal):', e.message);
+        }
       }
 
+      // Upload landmark image
       if (this.landmarkBlob) {
-        const landmarkResult = await api.uploadLandmark(this.landmarkBlob);
-        this.orderData.landmarkImageUrl = landmarkResult.url;
+        try {
+          const landmarkResult = await api.uploadLandmark(this.landmarkBlob);
+          this.orderData.landmarkImageUrl = landmarkResult.url;
+          console.log('✅ Landmark uploaded:', landmarkResult.url);
+        } catch (e) {
+          console.warn('Landmark upload failed (non-fatal):', e.message);
+        }
       }
 
-      // Create order
+      document.getElementById('processing-status').textContent = 'Creating order…';
+
+      // Create order in database
       const result = await api.createOrder(this.orderData);
       this.currentOrderId = result.orderId;
+      console.log('✅ Order created:', this.currentOrderId);
 
-      // Save order locally
+      // Save locally
       await db.save('orders', { ...result.order, id: this.currentOrderId });
 
       // Show waiting page
       this.showPage('waiting');
-      document.getElementById('order-id-display').textContent = `Order #${this.currentOrderId.substring(0, 8).toUpperCase()}`;
+      document.getElementById('order-id-display').textContent =
+        `Order #${this.currentOrderId.substring(0, 8).toUpperCase()}`;
 
-      // Simulate delivery executive assignment
-      setTimeout(() => {
-        this.simulateDeliveryAssignment();
-      }, 2000);
+      // Assign delivery executive after 1s
+      setTimeout(() => this.assignDelivery(), 1000);
+
     } catch (err) {
       console.error('Error placing order:', err);
-      alert('Failed to place order. Please try again.');
+      alert('Failed to place order: ' + err.message);
       document.getElementById('confirm-order-btn').disabled = false;
+      this.showPage('review');
     }
   }
 
-  async simulateDeliveryAssignment() {
-    // Simulate finding a delivery executive
-    try {
-      // In production, backend would find available executives
-      const deliveryExecutivePhone = '+919876543210'; // Simulated
-      const deliveryExecutiveId = 'exec-' + Math.random().toString(36).substr(2, 9);
+  async assignDelivery() {
+    // Ask for delivery executive phone
+    const input = prompt(
+      '📱 Enter delivery executive phone number\n(with country code, e.g. +919876543210)\n\nLeave blank to use simulated SMS (check server console for the link):',
+      '+91'
+    );
 
+    if (input === null) {
+      // User cancelled — still assign with dummy phone so link is generated
+    }
+
+    const phone = (input || '').trim() || '+919999999999';
+    const execId = 'exec-' + Math.random().toString(36).substring(2, 9);
+
+    try {
       const result = await api.assignDeliveryExecutive(
-        this.currentOrderId,
-        deliveryExecutivePhone,
-        deliveryExecutiveId
+        this.currentOrderId, phone, execId
       );
 
-      console.log('Delivery assigned, SMS sent with Find Me link:', result.findMeLink);
+      this.currentDeliveryExecutiveId    = execId;
+      this.currentDeliveryExecutivePhone = phone;
 
-      // Store delivery executive info
-      this.currentDeliveryExecutiveId = deliveryExecutiveId;
-      this.currentDeliveryExecutivePhone = deliveryExecutivePhone;
+      console.log('✅ Find Me link:', result.findMeLink);
 
-      // Listen for tracking
+      // Show the Find Me link on the waiting page so you can copy/test it
+      const waitingContainer = document.querySelector('.waiting-container');
+      if (waitingContainer && result.findMeLink) {
+        const linkBox = document.createElement('div');
+        linkBox.style.cssText = `
+          margin:16px 0;padding:12px 16px;
+          background:#fff8e1;border:1px solid #FFB800;border-radius:12px;
+          font-size:13px;word-break:break-all;text-align:left;
+        `;
+        linkBox.innerHTML = `
+          <div style="font-weight:700;color:#c47f00;margin-bottom:6px;">🔗 Find Me Link (sent via SMS)</div>
+          <a href="${result.findMeLink}" target="_blank" style="color:#0A2647;">${result.findMeLink}</a>
+          <button onclick="navigator.clipboard.writeText('${result.findMeLink}').then(()=>alert('Copied!'))"
+            style="display:block;margin-top:8px;padding:6px 14px;background:#FFB800;border:none;border-radius:20px;font-weight:700;cursor:pointer;font-size:12px;">
+            📋 Copy Link
+          </button>
+        `;
+        waitingContainer.appendChild(linkBox);
+      }
+
+      this.showNotification(`📱 SMS sent to ${phone}`);
+
       if (this.socket) {
         this.socket.emit('track-delivery', this.currentOrderId);
       }
 
-      // Show tracking page
-      setTimeout(() => {
-        this.showPage('tracking');
-      }, 3000);
     } catch (err) {
-      console.error('Error assigning delivery executive:', err);
-      alert('Failed to assign delivery executive');
+      console.error('Assignment error:', err);
+      this.showNotification('⚠️ Could not assign delivery: ' + err.message);
     }
   }
 
@@ -703,11 +770,11 @@ class DoorPilotApp {
 
     // Order page events
     document.getElementById('proceed-btn').addEventListener('click', () => {
-      this.setupDeliveryDetailsForm();
       this.showPage('delivery-details');
+      this.setupDeliveryDetailsForm();
     });
 
-    // Delivery details form setup
+    // Delivery details form — also set up now in case page is already visible
     this.setupDeliveryDetailsForm();
 
     // Map page events
@@ -879,119 +946,88 @@ class DoorPilotApp {
       if (modalLat) miniMap.flyTo([modalLat, modalLng], 19, { animate: true, duration: 0.8 });
     });
 
-    // GPS — high accuracy
+    // GPS — try high accuracy first, fall back to network location
     if (!navigator.geolocation) {
       document.getElementById('loc-place-name').textContent = 'Geolocation not supported';
       document.getElementById('loc-map-loading').style.display = 'none';
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        modalLat = pos.coords.latitude;
-        modalLng = pos.coords.longitude;
-        const acc = pos.coords.accuracy;
+    const doLocate = (highAccuracy, attempt) => {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          modalLat = pos.coords.latitude;
+          modalLng = pos.coords.longitude;
+          const acc = pos.coords.accuracy;
 
-        // Hide loading overlay
-        document.getElementById('loc-map-loading').style.display = 'none';
+          document.getElementById('loc-map-loading').style.display = 'none';
+          document.getElementById('loc-coords').textContent =
+            `${modalLat.toFixed(6)}, ${modalLng.toFixed(6)}  ±${Math.round(acc)}m` +
+            (acc > 500 ? '  ⚠️ Low accuracy' : '');
 
-        // Show coords immediately
-        document.getElementById('loc-coords').textContent =
-          `${modalLat.toFixed(6)}, ${modalLng.toFixed(6)}  ±${Math.round(acc)}m`;
-
-        // Pulsing "you are here" dot
-        const youIcon = L.divIcon({
-          className: '',
-          html: `
-            <div style="position:relative;width:22px;height:22px;">
-              <div style="
-                position:absolute;inset:0;border-radius:50%;
-                background:rgba(66,133,244,0.25);
-                animation:markerPulse 2s infinite;
-              "></div>
-              <div style="
-                position:absolute;top:50%;left:50%;
-                transform:translate(-50%,-50%);
-                width:14px;height:14px;border-radius:50%;
-                background:#4285F4;border:2.5px solid #fff;
-                box-shadow:0 2px 6px rgba(66,133,244,0.6);
-              "></div>
+          const youIcon = L.divIcon({
+            className: '',
+            html: `<div style="position:relative;width:22px;height:22px;">
+              <div style="position:absolute;inset:0;border-radius:50%;background:rgba(66,133,244,0.25);animation:markerPulse 2s infinite;"></div>
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:#4285F4;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(66,133,244,0.6);"></div>
             </div>`,
-          iconSize: [22, 22],
-          iconAnchor: [11, 11]
-        });
+            iconSize: [22, 22], iconAnchor: [11, 11]
+          });
 
-        myMarker = L.marker([modalLat, modalLng], { icon: youIcon }).addTo(miniMap);
+          myMarker = L.marker([modalLat, modalLng], { icon: youIcon }).addTo(miniMap);
+          myCircle = L.circle([modalLat, modalLng], {
+            radius: acc, color: '#4285F4', fillColor: '#4285F4', fillOpacity: 0.08, weight: 1.5
+          }).addTo(miniMap);
+          miniMap.flyTo([modalLat, modalLng], 17, { animate: true, duration: 1.2 });
 
-        // Accuracy circle
-        myCircle = L.circle([modalLat, modalLng], {
-          radius: acc,
-          color: '#4285F4',
-          fillColor: '#4285F4',
-          fillOpacity: 0.08,
-          weight: 1.5
-        }).addTo(miniMap);
-
-        // Fly to exact location at street level (zoom 17 = neighbourhood, user can zoom to 20 for buildings)
-        miniMap.flyTo([modalLat, modalLng], 17, { animate: true, duration: 1.2 });
-
-        // Reverse geocode — get place name + full address
-        document.getElementById('loc-place-name').textContent = 'Fetching address…';
-        try {
-          // Use Nominatim directly for richer place data
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${modalLat}&lon=${modalLng}&format=json&zoom=18&addressdetails=1`,
-            { headers: { 'Accept-Language': 'en', 'User-Agent': 'DoorPilot/1.0' } }
-          );
-          const geo = await res.json();
-
-          if (geo && geo.display_name) {
-            const addr = geo.address || {};
-            // Build a human-friendly place name
-            const placeName =
-              addr.amenity || addr.building || addr.college || addr.university ||
-              addr.school || addr.hospital || addr.mall || addr.shop ||
-              addr.road || addr.neighbourhood || addr.suburb || 'Your Location';
-
-            const shortAddr = [
-              addr.road || addr.pedestrian,
-              addr.neighbourhood || addr.suburb,
-              addr.city || addr.town || addr.village,
-              addr.state
-            ].filter(Boolean).join(', ');
-
-            document.getElementById('loc-place-name').textContent = placeName;
-            document.getElementById('loc-modal-address').textContent = shortAddr || geo.display_name;
-
-            // Add a label popup on the marker
-            myMarker.bindPopup(`<b>${placeName}</b><br><small>${shortAddr}</small>`, {
-              offset: [0, -12], closeButton: false
-            }).openPopup();
-          }
-        } catch {
-          // Fallback to our backend
+          document.getElementById('loc-place-name').textContent = 'Fetching address…';
           try {
-            const res2 = await fetch(`/api/reverse-geocode?lat=${modalLat}&lng=${modalLng}`);
-            const d2   = await res2.json();
-            if (d2.success) {
-              document.getElementById('loc-place-name').textContent = 'Your Location';
-              document.getElementById('loc-modal-address').textContent = d2.address;
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${modalLat}&lon=${modalLng}&format=json&zoom=18&addressdetails=1`,
+              { headers: { 'Accept-Language': 'en', 'User-Agent': 'DoorPilot/1.0' } }
+            );
+            const geo = await res.json();
+            if (geo && geo.display_name) {
+              const addr = geo.address || {};
+              const placeName = addr.amenity || addr.building || addr.college || addr.university ||
+                addr.school || addr.hospital || addr.shop || addr.road || addr.neighbourhood || addr.suburb || 'Your Location';
+              const shortAddr = [addr.road || addr.pedestrian, addr.neighbourhood || addr.suburb,
+                addr.city || addr.town || addr.village, addr.state].filter(Boolean).join(', ');
+              document.getElementById('loc-place-name').textContent = placeName;
+              document.getElementById('loc-modal-address').textContent = shortAddr || geo.display_name;
+              myMarker.bindPopup(`<b>${placeName}</b><br><small>${shortAddr}</small>`, { offset: [0,-12], closeButton: false }).openPopup();
             }
-          } catch { /* silent */ }
-        }
-      },
-      (err) => {
-        document.getElementById('loc-map-loading').style.display = 'none';
-        const msgs = {
-          1: 'Location permission denied.\nPlease allow location in browser settings.',
-          2: 'Location signal unavailable. Try moving to an open area.',
-          3: 'Location request timed out. Try again.'
-        };
-        document.getElementById('loc-place-name').textContent = '⚠️ Location Error';
-        document.getElementById('loc-modal-address').textContent = msgs[err.code] || 'Could not get location';
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
+          } catch {
+            try {
+              const r2 = await fetch(`/api/reverse-geocode?lat=${modalLat}&lng=${modalLng}`);
+              const d2 = await r2.json();
+              if (d2.success) {
+                document.getElementById('loc-place-name').textContent = 'Your Location';
+                document.getElementById('loc-modal-address').textContent = d2.address;
+              }
+            } catch { /* silent */ }
+          }
+        },
+        (err) => {
+          if (highAccuracy && attempt === 1) {
+            // Retry with network/WiFi location
+            doLocate(false, 2);
+            return;
+          }
+          document.getElementById('loc-map-loading').style.display = 'none';
+          const msgs = {
+            1: '❌ Location permission denied.\nClick the 🔒 icon in your address bar → Site settings → Location → Allow, then refresh.',
+            2: '⚠️ Location unavailable. Try on a phone for accurate GPS.',
+            3: '⏱️ Location timed out. Check browser location permissions.'
+          };
+          document.getElementById('loc-place-name').textContent = '⚠️ Location Error';
+          document.getElementById('loc-modal-address').textContent = msgs[err.code] || 'Could not get location';
+        },
+        { enableHighAccuracy: highAccuracy, timeout: highAccuracy ? 8000 : 15000, maximumAge: 30000 }
+      );
+    };
+
+    doLocate(true, 1);
 
     // Navigate button
     document.getElementById('loc-modal-navigate').addEventListener('click', () => {

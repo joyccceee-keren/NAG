@@ -1,29 +1,18 @@
 const express = require('express');
-const router = express.Router();
-const orderController = require('../controllers/orderController');
+const router  = express.Router();
+const ctrl    = require('../controllers/orderController');
 
-// Get items catalog
-router.get('/items', orderController.getItems);
+// IMPORTANT: specific routes MUST come before /:orderId wildcard
 
-// Create new order
-router.post('/create', orderController.createOrder);
+router.get('/items',          ctrl.getItems);               // GET  /api/orders/items
+router.get('/token/:token',   ctrl.getOrderByToken);        // GET  /api/orders/token/:token
+router.get('/',               ctrl.getAllOrders);            // GET  /api/orders
+router.get('/:orderId',       ctrl.getOrder);               // GET  /api/orders/:orderId
 
-// Get specific order
-router.get('/:orderId', orderController.getOrder);
+router.post('/create',        ctrl.createOrder);            // POST /api/orders/create
+router.post('/assign-delivery', ctrl.assignDeliveryExecutive); // POST /api/orders/assign-delivery
+router.post('/rate',          ctrl.submitRating);           // POST /api/orders/rate
 
-// Get order by Find Me token (for delivery executive)
-router.get('/token/:token', orderController.getOrderByToken);
-
-// Assign delivery executive and send SMS
-router.post('/assign-delivery', orderController.assignDeliveryExecutive);
-
-// Update order status
-router.put('/:orderId/status', orderController.updateOrderStatus);
-
-// Submit rating and feedback
-router.post('/rate', orderController.submitRating);
-
-// Get all orders (admin)
-router.get('/', orderController.getAllOrders);
+router.put('/:orderId/status', ctrl.updateOrderStatus);     // PUT  /api/orders/:orderId/status
 
 module.exports = router;
