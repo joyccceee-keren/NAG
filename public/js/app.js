@@ -101,11 +101,13 @@ class DoorPilotApp {
         await this.loadItems();
         break;
       case 'map':
+        // Destroy old map instance if any, then re-init after container is visible
+        mapManager.destroy();
         setTimeout(() => {
           mapManager.initMap('map', (lat, lng) => {
             this.orderData.mapPin = { latitude: lat, longitude: lng };
           });
-        }, 100);
+        }, 150);
         break;
       case 'voice':
         this.setupVoiceRecording();
@@ -694,6 +696,11 @@ class DoorPilotApp {
   }
 
   handlePageLoad() {
+    // ── Header 📍 button — show live location in a modal map ──────────────
+    document.getElementById('location-btn').addEventListener('click', () => {
+      this._openLocationModal();
+    });
+
     // Order page events
     document.getElementById('proceed-btn').addEventListener('click', () => {
       this.setupDeliveryDetailsForm();
@@ -705,7 +712,9 @@ class DoorPilotApp {
 
     // Map page events
     document.getElementById('get-current-location').addEventListener('click', () => {
-      mapManager.getCurrentLocation();
+      mapManager.getCurrentLocation((lat, lng) => {
+        this.orderData.mapPin = { latitude: lat, longitude: lng };
+      });
     });
 
     document.getElementById('next-voice-btn').addEventListener('click', () => {
@@ -757,6 +766,152 @@ class DoorPilotApp {
     if (window.location.pathname.includes('/find-me/')) {
       this.showPage('findme');
     }
+  }
+  // ==================== LOCATION MODAL ====================
+  _openLocationModal() {
+    // Remove any existing modal
+    const existing = document.getElementById('location-modal');
+    if (existing) existing.remove();
+
+    // Build modal
+    const modal = document.createElement('div');
+    modal.id = 'location-modal';
+    modal.style.cssText = `
+      position:fixed;inset:0;z-index:10000;
+      background:rgba(0,0,0,0.55);
+      display:flex;align-items:flex-end;justify-content:center;
+      animation:fadeIn 0.2s ease;
+    `;
+
+    modal.innerHTML = `
+      <div style="
+        width:100%;max-width:600px;
+        background:#fff;border-radius:24px 24px 0 0;
+        overflow:hidden;box-shadow:0 -4px 32px rgba(0,0,0,0.2);
+        animation:slideInFromBottom 0.3s ease-out;
+      ">
+        <div style="background:#FFB800;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-weight:700;font-size:16px;">📍 Your Current Location</span>
+          <button id="close-loc-modal" style="background:none;border:none;font-size:22px;cursor:pointer;line-height:1;">✕</button>
+        </div>
+        <div id="loc-modal-map" style="height:300px;width:100%;"></div>
+        <div style="padding:14px 20px 8px;">
+          <div id="loc-modal-address" style="
+            font-size:14px;color:#444;background:#fff8e1;
+            border:1px solid #FFB800;border-radius:10px;
+            padding:10px 14px;margin-bottom:12px;min-height:42px;
+          ">📡 Detecting your location…</div>
+          <div style="display:flex;gap:10px;padding-bottom:16px;">
+            <button id="loc-modal-navigate" style="
+              flex:1;padding:13px;border:none;border-radius:40px;
+              background:#FFB800;color:#1e1e1e;font-weight:700;font-size:15px;cursor:pointer;
+            ">🗺️ Open in Maps</button>
+            <button id="loc-modal-share" style="
+              flex:1;padding:13px;border:none;border-radius:40px;
+              background:#0A2647;color:#fff;font-weight:700;font-size:15px;cursor:pointer;
+            ">🔗 Share Location</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.remove();
+    });
+    document.getElementById('close-loc-modal').addEventListener('click', () => modal.remove());
+
+    // Init mini map inside modal
+    let modalLat = null, modalLng = null;
+
+    const miniMap = L.map('loc-modal-map', { zoomControl: true }).setView([20.5937, 78.9629], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+      maxZoom: 19
+    }).addTo(miniMap);
+
+    setTimeout(() => miniMap.invalidateSize(), 200);
+
+    // Get GPS
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          modalLat = pos.coords.latitude;
+          modalLng = pos.coords.longitude;
+
+          // Pin on mini map
+          const icon = L.divIcon({
+            className: '',
+            html: `<div style="width:20px;height:20px;background:#FFB800;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(255,184,0,0.35);"></div>`,
+            iconSize: [20, 20], iconAnchor: [10, 10]
+          });
+          L.marker([modalLat, modalLng], { icon }).addTo(miniMap);
+          L.circle([modalLat, modalLng], {
+            radius: pos.coords.accuracy,
+            color: '#FFB800', fillColor: '#FFD440', fillOpacity: 0.15, weight: 1
+          }).addTo(miniMap);
+          miniMap.flyTo([modalLat, modalLng], 17, { animate: true, duration: 1 });
+
+          // Reverse geocode via our backend (Nominatim)
+          try {
+            const res  = await fetch(`/api/reverse-geocode?lat=${modalLat}&lng=${modalLng}`);
+            const data = await res.json();
+            document.getElementById('loc-modal-address').textContent =
+              data.success ? `📍 ${data.address}` : `${modalLat.toFixed(5)}, ${modalLng.toFixed(5)}`;
+          } catch {
+            document.getElementById('loc-modal-address').textContent =
+              `${modalLat.toFixed(5)}, ${modalLng.toFixed(5)}`;
+          }
+        },
+        (err) => {
+          const msgs = { 1: 'Permission denied — allow location in browser settings.', 2: 'Location unavailable.', 3: 'Timed out.' };
+          document.getElementById('loc-modal-address').textContent = msgs[err.code] || 'Could not get location';
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    } else {
+      document.getElementById('loc-modal-address').textContent = 'Geolocation not supported';
+    }
+
+    // Open in Maps button
+    document.getElementById('loc-modal-navigate').addEventListener('click', () => {
+      if (!modalLat) return;
+      const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isAndroid = /Android/.test(navigator.userAgent);
+      let url;
+      if (isIOS)          url = `maps://maps.apple.com/?ll=${modalLat},${modalLng}&q=My+Location`;
+      else if (isAndroid) url = `geo:${modalLat},${modalLng}?q=${modalLat},${modalLng}(My+Location)`;
+      else                url = `https://www.google.com/maps?q=${modalLat},${modalLng}`;
+      window.open(url, '_blank');
+    });
+
+    // Share Location button
+    document.getElementById('loc-modal-share').addEventListener('click', async () => {
+      if (!modalLat) return;
+      const shareUrl = `https://www.google.com/maps?q=${modalLat},${modalLng}`;
+      const addrEl   = document.getElementById('loc-modal-address');
+      const address  = addrEl ? addrEl.textContent.replace('📍 ', '') : '';
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'My Location — DoorPilot',
+            text: address || `${modalLat.toFixed(5)}, ${modalLng.toFixed(5)}`,
+            url: shareUrl
+          });
+        } catch { /* user cancelled */ }
+      } else {
+        // Fallback: copy to clipboard
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          this.showNotification('📋 Location link copied to clipboard!');
+        } catch {
+          this.showNotification('📍 ' + shareUrl);
+        }
+      }
+    });
   }
 }
 

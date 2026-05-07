@@ -167,125 +167,94 @@ body {
   margin: 32px auto 0;
   overflow: hidden;
   border-radius: 28px;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), transparent 40%), linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.02));
+  background: linear-gradient(160deg, #fff9e6 0%, #fff3c4 60%, #ffe88a 100%);
   box-shadow: var(--shadow-lg);
 }
 
+/* Road strip */
 .road {
   position: absolute;
   left: 0;
-  bottom: 22px;
+  bottom: 0;
   width: 100%;
-  height: 48px;
-  background: linear-gradient(90deg, rgba(20,20,20,0.08), rgba(20,20,20,0.1));
-  border-radius: 9999px;
+  height: 44px;
+  background: linear-gradient(180deg, #e0e0e0 0%, #c8c8c8 100%);
+  border-top: 3px solid #bbb;
 }
 
+/* Dashed centre line */
+.road::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    #fff 0px, #fff 30px,
+    transparent 30px, transparent 60px
+  );
+  transform: translateY(-50%);
+  animation: roadScroll 0.6s linear infinite;
+}
+
+@keyframes roadScroll {
+  from { background-position: 0 0; }
+  to   { background-position: -60px 0; }
+}
+
+/* SVG scooter wrapper */
 .scooter {
   position: absolute;
-  bottom: 36px;
-  left: -120px;
-  width: 140px;
-  height: 90px;
-  animation: rideAcross 4s ease-in-out infinite;
+  bottom: 30px;
+  left: -220px;
+  width: 200px;
+  height: 160px;
+  animation: rideAcross 3.2s linear infinite;
 }
 
-.scooter-body {
-  position: absolute;
-  bottom: 0;
-  left: 22px;
-  width: 76px;
-  height: 34px;
-  border-radius: 20px 20px 10px 10px;
-  background: #1E1E1E;
-}
-
-.scooter-head {
-  position: absolute;
-  bottom: 24px;
-  left: 80px;
-  width: 28px;
-  height: 22px;
-  border-radius: 50% 50% 20% 20%;
-  background: #1E1E1E;
-}
-
-.scooter-helmet {
-  position: absolute;
-  bottom: 44px;
-  left: 88px;
-  width: 22px;
-  height: 20px;
-  border-radius: 50% 50% 40% 40%;
-  background: var(--primary);
-  border: 3px solid #1E1E1E;
-}
-
-.scooter-wheel {
-  position: absolute;
-  bottom: -8px;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: #1E1E1E;
-  border: 5px solid #FFD440;
-  animation: wheelSpin 0.6s linear infinite;
-}
-
-.wheel-back { left: 10px; }
-
-.wheel-front { right: 12px; }
-
-.scooter-tail {
-  position: absolute;
-  bottom: 22px;
-  left: 6px;
-  width: 28px;
-  height: 8px;
-  border-radius: 5px;
-  background: var(--primary);
+/* Wheel spin applied to the wheel groups inside SVG */
+.scooter .wheel-spin {
+  transform-origin: center;
+  animation: wheelSpin 0.5s linear infinite;
 }
 
 @keyframes rideAcross {
-  0% { left: -140px; transform: translateY(0) scale(1); }
-  50% { left: calc(100% + 20px); transform: translateY(-8px) scale(1.03); }
-  100% { left: -140px; transform: translateY(0) scale(1); }
+  0%   { left: -220px; }
+  100% { left: calc(100% + 20px); }
 }
 
 @keyframes wheelSpin {
   to { transform: rotate(360deg); }
 }
 
-.hero-animation::before {
-  content: '';
-  position: absolute;
-  top: 16px;
-  right: 18px;
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.32);
-  filter: blur(10px);
+/* Subtle bounce while riding */
+.scooter svg {
+  animation: rideBounce 0.4s ease-in-out infinite alternate;
 }
 
-.hero-animation::after {
+@keyframes rideBounce {
+  from { transform: translateY(0px); }
+  to   { transform: translateY(-4px); }
+}
+
+.hero-animation::before {
   content: 'Fast delivery to your door';
   position: absolute;
   top: 18px;
   left: 22px;
-  color: #1C1C1C;
-  font-size: 14px;
+  color: #5a3e00;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.3px;
-  opacity: 0.8;
+  opacity: 0.75;
 }
 
 .doorpilot-logo {
-  width: 150px;
-  height: 150px;
-  filter: drop-shadow(var(--shadow-lg));
-  stroke: var(--surface);
-  stroke-width: 2;
+  width: 160px;
+  height: 130px;
+  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18));
 }
 
 .doorpilot-logo .pin-drop {
@@ -349,7 +318,7 @@ body {
   padding: 10px 16px;
 }
 
-.header-logo { width: 36px; height: 36px; border-radius: 10px; margin-right: 8px; box-shadow: var(--shadow-sm); }
+.header-logo { width: 42px; height: 32px; border-radius: 0; margin-right: 6px; flex-shrink: 0; }
 .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text-primary); }
 .logo .brand { font-size: 18px; }
 
