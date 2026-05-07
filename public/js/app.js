@@ -128,79 +128,146 @@ class DoorPilotApp {
   async loadItems() {
     try {
       const items = await api.getItems();
-      this.renderItems(items);
+      this.fullCatalog = items;
     } catch (err) {
       console.warn('API items load failed, using local sample catalog:', err);
-
-      // Fallback sample catalog with realistic product images (Unsplash / public images)
-      const sampleCatalog = {
-        "Snacks": [
-          { id: 'lays-01', name: 'Lays Classic Chips - 50g', price: 25, img: 'https://images.unsplash.com/photo-1606813902833-3c4a6b7a9b7b?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=1f3e3e6f1a4d6c9f9b8a' },
-          { id: 'popcorn-01', name: 'Butter Popcorn - 100g', price: 45, img: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=9c7b1a2f4b9c8f1c2d3a' }
+      this.fullCatalog = {
+        "🥬 Groceries": [
+          { id: 'tomato-01',    name: 'Fresh Tomatoes',   price: 30,  img: 'https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg?w=400' },
+          { id: 'potato-01',   name: 'Potatoes 1kg',      price: 40,  img: 'https://images.pexels.com/photos/144248/potatoes-vegetables-erdfrucht-bio-144248.jpeg?w=400' },
+          { id: 'onion-01',    name: 'Onions 1kg',        price: 35,  img: 'https://images.pexels.com/photos/175414/pexels-photo-175414.jpeg?w=400' },
+          { id: 'carrot-01',   name: 'Carrots 500g',      price: 30,  img: 'https://images.pexels.com/photos/1306559/pexels-photo-1306559.jpeg?w=400' },
+          { id: 'capsicum-01', name: 'Capsicum 3pcs',     price: 45,  img: 'https://images.pexels.com/photos/594137/pexels-photo-594137.jpeg?w=400' },
+          { id: 'spinach-01',  name: 'Fresh Spinach',     price: 25,  img: 'https://images.pexels.com/photos/2325843/pexels-photo-2325843.jpeg?w=400' },
+          { id: 'milk-01',     name: 'Fresh Milk 500ml',  price: 30,  img: 'https://images.pexels.com/photos/248412/pexels-photo-248412.jpeg?w=400' },
+          { id: 'bread-01',    name: 'Whole Wheat 1kg',   price: 45,  img: 'https://images.pexels.com/photos/1775043/pexels-photo-1775043.jpeg?w=400' },
+          { id: 'eggs-01',     name: 'Farm Eggs 6pcs',    price: 60,  img: 'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?w=400' }
         ],
-        "Cookies": [
-          { id: 'unibic-01', name: 'Unibic Chocolate Chip Cookies - 100g', price: 60, img: 'https://images.unsplash.com/photo-1604908177522-8b5f2b0d1d1d?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=3d1e2f4e5a6b7c8d9e0f' },
-          { id: 'oreo-01', name: 'Oreo Chocolate Sandwich - 95g', price: 40, img: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=5b6c7d8e9f0a1b2c3d4e' }
+        "🍔 Food": [
+          { id: 'burger-01',   name: 'Veg Burger',        price: 120, img: 'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?w=400' },
+          { id: 'pizza-01',    name: 'Margherita Pizza',  price: 199, img: 'https://images.pexels.com/photos/825661/pexels-photo-825661.jpeg?w=400' },
+          { id: 'biryani-01',  name: 'Veg Biryani',      price: 150, img: 'https://images.pexels.com/photos/7426873/pexels-photo-7426873.jpeg?w=400' },
+          { id: 'dosa-01',     name: 'Masala Dosa',      price: 90,  img: 'https://images.pexels.com/photos/5560763/pexels-photo-5560763.jpeg?w=400' },
+          { id: 'sandwich-01', name: 'Grilled Sandwich',  price: 80,  img: 'https://images.pexels.com/photos/1647163/pexels-photo-1647163.jpeg?w=400' }
         ],
-        "Beverages": [
-          { id: 'cola-01', name: 'Spark Cola 300ml', price: 30, img: 'https://images.unsplash.com/photo-1601050690597-5b8f0d3d1a2b?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=7e8f9a0b1c2d3e4f5a6b' }
+        "🍿 Snacks": [
+          { id: 'chips-01',    name: "Lay's Chips",       price: 25,  img: 'https://images.pexels.com/photos/1583884/pexels-photo-1583884.jpeg?w=400' },
+          { id: 'popcorn-01',  name: 'Butter Popcorn',   price: 45,  img: 'https://images.pexels.com/photos/33129/popcorn-movie-party-entertainment.jpg?w=400' },
+          { id: 'nachos-01',   name: 'Nachos & Salsa',   price: 55,  img: 'https://images.pexels.com/photos/1108117/pexels-photo-1108117.jpeg?w=400' },
+          { id: 'biscuit-01',  name: 'Marie Biscuits',   price: 20,  img: 'https://images.pexels.com/photos/890515/pexels-photo-890515.jpeg?w=400' },
+          { id: 'pringles-01', name: 'Pringles Original',price: 99,  img: 'https://images.pexels.com/photos/1583884/pexels-photo-1583884.jpeg?w=400' }
+        ],
+        "🍪 Cookies": [
+          { id: 'chocochip-01',     name: 'Choc Chunk Cookies', price: 60,  img: 'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg?w=400' },
+          { id: 'oreo-01',          name: 'Oreo Sandwich',      price: 40,  img: 'https://images.pexels.com/photos/3026804/pexels-photo-3026804.jpeg?w=400' },
+          { id: 'butter-cookie-01', name: 'Butter Cookies',     price: 120, img: 'https://images.pexels.com/photos/1028714/pexels-photo-1028714.jpeg?w=400' },
+          { id: 'digestive-01',     name: 'Digestive Biscuit',  price: 55,  img: 'https://images.pexels.com/photos/890515/pexels-photo-890515.jpeg?w=400' },
+          { id: 'goodday-01',       name: 'Good Day Cashew',    price: 30,  img: 'https://images.pexels.com/photos/1028714/pexels-photo-1028714.jpeg?w=400' }
+        ],
+        "🥤 Beverages": [
+          { id: 'cola-01',   name: 'Coca Cola 300ml',    price: 40,  img: 'https://images.pexels.com/photos/50593/coca-cola-cold-drink-soft-drink-coke-50593.jpeg?w=400' },
+          { id: 'water-01',  name: 'Bisleri Water 1L',   price: 20,  img: 'https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg?w=400' },
+          { id: 'soda-01',   name: 'Faurito Soda',       price: 30,  img: 'https://images.pexels.com/photos/2983100/pexels-photo-2983100.jpeg?w=400' },
+          { id: 'juice-01',  name: 'Orange Juice',       price: 35,  img: 'https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?w=400' },
+          { id: 'coffee-01', name: 'Sleepy Owl Coffee',  price: 299, img: 'https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?w=400' },
+          { id: 'lassi-01',  name: 'Sweet Lassi',        price: 50,  img: 'https://images.pexels.com/photos/3625372/pexels-photo-3625372.jpeg?w=400' }
+        ],
+        "💊 Medicines": [
+          { id: 'paracetamol-01', name: 'Paracetamol 650mg',    price: 25,  img: 'https://images.pexels.com/photos/159211/headache-pain-pills-medication-159211.jpeg?w=400' },
+          { id: 'bandaid-01',     name: 'Band-Aid Flex',        price: 35,  img: 'https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?w=400' },
+          { id: 'cough-01',       name: 'Cough Syrup',          price: 85,  img: 'https://images.pexels.com/photos/3683074/pexels-photo-3683074.jpeg?w=400' },
+          { id: 'sanitizer-01',   name: 'Hand Sanitizer',       price: 60,  img: 'https://images.pexels.com/photos/3873193/pexels-photo-3873193.jpeg?w=400' },
+          { id: 'vitaminc-01',    name: 'Vitamin C 500mg',      price: 50,  img: 'https://images.pexels.com/photos/159211/headache-pain-pills-medication-159211.jpeg?w=400' }
+        ],
+        "📄 Documents": [
+          { id: 'print-01',    name: 'A4 Printing',      price: 5,   img: 'https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?w=400' },
+          { id: 'envelope-01', name: 'Courier Envelope', price: 15,  img: 'https://images.pexels.com/photos/1591062/pexels-photo-1591062.jpeg?w=400' },
+          { id: 'stamp-01',    name: 'Postage Stamp',    price: 10,  img: 'https://images.pexels.com/photos/1591062/pexels-photo-1591062.jpeg?w=400' },
+          { id: 'folder-01',   name: 'Document Folder',  price: 30,  img: 'https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?w=400' },
+          { id: 'pen-01',      name: 'Ball Pen Pack',    price: 20,  img: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?w=400' }
         ]
       };
-
-      this.renderItems(sampleCatalog);
     }
+
+    this.selectedCategory = 'all';
+    this.setupCategoryFilter();
+    this.renderCatalog();
   }
 
-  renderItems(catalogItems) {
+  setupCategoryFilter() {
+    document.querySelectorAll('.category-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.category-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.selectedCategory = btn.dataset.category;
+        this.renderCatalog();
+      });
+    });
+  }
+
+  renderCatalog() {
     const grid = document.getElementById('items-grid');
     grid.innerHTML = '';
-    // Render categories as grouped sections for a marketplace feel
-    Object.keys(catalogItems).forEach(category => {
-      const section = document.createElement('section');
-      section.className = 'catalog-section container';
 
-      const header = document.createElement('div');
-      header.className = 'catalog-header';
-      header.innerHTML = `<h2>${category}</h2>`;
-      section.appendChild(header);
+    const catalog = this.fullCatalog;
+    const selected = this.selectedCategory;
+
+    const categoriesToShow = selected === 'all'
+      ? Object.keys(catalog)
+      : Object.keys(catalog).filter(k => k === selected);
+
+    if (categoriesToShow.length === 0) {
+      grid.innerHTML = '<p style="text-align:center;color:#888;padding:40px;">No items found</p>';
+      return;
+    }
+
+    categoriesToShow.forEach(category => {
+      const section = document.createElement('div');
+      section.className = 'catalog-section';
+
+      section.innerHTML = `<h2 class="cat-title">${category}</h2>`;
 
       const row = document.createElement('div');
-      row.className = 'items-grid';
+      row.className = 'product-grid';
 
-      catalogItems[category].forEach(item => {
+      catalog[category].forEach(item => {
         const card = document.createElement('div');
-        card.className = 'item-card';
+        card.className = 'product-card';
         card.innerHTML = `
-          <div class="item-img">
-            <img src="${item.img}" alt="${item.name}">
+          <div class="product-img">
+            <img src="${item.img}" alt="${item.name}" onerror="this.onerror=null;this.src='https://placehold.co/200x140/f5f5f5/FFB800?text=${encodeURIComponent(item.name)}'">
           </div>
-          <div class="item-body">
-            <div class="item-meta">
-              <div>
-                <div class="item-name">${item.name}</div>
-                <div class="item-sub">Fast delivery • 20-30 mins</div>
-              </div>
-              <div class="item-price">₹${item.price}</div>
-            </div>
-            <div class="item-row">
-              <div class="item-qty">In cart: <span id="qty-${item.id}">0</span></div>
-              <div class="item-cta"><button class="add-btn">ADD</button></div>
+          <div class="product-info">
+            <div class="product-name">${item.name}</div>
+            <div class="product-meta">20-30 mins</div>
+            <div class="product-footer">
+              <span class="product-price">₹${item.price}</span>
+              <button class="product-add-btn" aria-label="Add ${item.name} to cart">ADD</button>
             </div>
           </div>
         `;
-
-        // Add button handler
-        card.querySelector('.add-btn').addEventListener('click', (e) => {
+        card.querySelector('.product-add-btn').addEventListener('click', (e) => {
           e.stopPropagation();
           this.addToCart(item);
+          // Visual feedback
+          const btn = e.target;
+          btn.textContent = '✓';
+          btn.style.background = '#3A8B39';
+          setTimeout(() => { btn.textContent = 'ADD'; btn.style.background = ''; }, 800);
         });
-
         row.appendChild(card);
       });
 
       section.appendChild(row);
       grid.appendChild(section);
     });
+  }
+
+  renderItems(catalogItems) {
+    this.fullCatalog = catalogItems;
+    this.selectedCategory = 'all';
+    this.setupCategoryFilter();
+    this.renderCatalog();
   }
 
   addToCart(item) {

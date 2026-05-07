@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/animations.css">
   <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="stylesheet" href="/css/overrides.css">
   
   <!-- Leaflet Maps (OSM) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
@@ -91,12 +92,14 @@
 
         <!-- Category strip: horizontal scrollable pills -->
         <div class="categories" id="categories">
-          <button class="category-pill">Groceries</button>
-          <button class="category-pill">Food</button>
-          <button class="category-pill">Medicines</button>
-          <button class="category-pill">Documents</button>
-          <button class="category-pill">Parcel</button>
-          <button class="category-pill">Essentials</button>
+          <button class="category-pill active" data-category="all">All</button>
+          <button class="category-pill" data-category="🥬 Groceries">Groceries</button>
+          <button class="category-pill" data-category="🍔 Food">Food</button>
+          <button class="category-pill" data-category="🍿 Snacks">Snacks</button>
+          <button class="category-pill" data-category="🍪 Cookies">Cookies</button>
+          <button class="category-pill" data-category="🥤 Beverages">Beverages</button>
+          <button class="category-pill" data-category="💊 Medicines">Medicines</button>
+          <button class="category-pill" data-category="📄 Documents">Documents</button>
         </div>
 
         <div class="items-grid" id="items-grid">
