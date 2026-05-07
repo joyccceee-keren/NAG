@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="DoorPilot - Delivery location sharing with voice guidance">
+  <meta name="theme-color" content="#0A2647">
+  <title>DoorPilot - Find Your Delivery</title>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  
+  <!-- Leaflet Maps (OSM) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  
+  <!-- Manifest for PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="/assets/icon-192.png">
+  <link rel="apple-touch-icon" href="/assets/icon-192.png">
+</head>
+<body>
+  <div id="app">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loader"></div>
+      <p>Loading DoorPilot...</p>
+    </div>
+
+    <!-- Landing Page (Animation) -->
+    <div id="landing-page" class="page hidden">
+      <div class="landing-container">
+        <div class="landing-hero">
+          <div class="logo-animation">
+            <svg class="doorpilot-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <!-- Door icon -->
+              <rect x="40" y="40" width="100" height="120" fill="none" stroke="#0A2647" stroke-width="3" rx="5"/>
+              <!-- Door knob -->
+              <circle cx="125" cy="100" r="8" fill="#0A2647"/>
+              <!-- Pin marker -->
+              <circle cx="100" cy="160" r="12" fill="#FF6B6B" opacity="0" class="pin-drop"/>
+            </svg>
+          </div>
+          <h1 class="landing-title">DoorPilot</h1>
+          <p class="landing-subtitle">Guide your delivery. Find your door.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Selection Page -->
+    <div id="order-page" class="page hidden">
+      <div class="container">
+        <div class="page-header">
+          <h1>What can we deliver?</h1>
+          <p>Select items you would like to order</p>
+        </div>
+
+        <div class="items-grid" id="items-grid">
+          <!-- Items will be loaded here -->
+        </div>
+
+        <div class="cart-summary">
+          <div class="cart-info">
+            <span>Items in cart: <strong id="cart-count">0</strong></span>
+            <span>Total: <strong id="cart-total">₹0</strong></span>
+          </div>
+          <button id="proceed-btn" class="btn btn-primary btn-block" disabled aria-label="Proceed to delivery details">Proceed to Delivery Details</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delivery Details Page -->
+    <div id="delivery-details-page" class="page hidden">
+      <div class="container">
+        <div class="page-header">
+          <h1>Delivery Location Details</h1>
+          <p>Help us find your door</p>
+        </div>
+
+        <form id="delivery-form" class="delivery-form">
+          <div class="form-section">
+            <h3>Basic Information</h3>
+          <input type="text" id="apartment-name" placeholder="Apartment or Building name" required>
+          <input type="text" id="colony-name" placeholder="Colony or Society name" required>
+          <input type="text" id="flat-number" placeholder="Flat or Unit number" required>
+
+          <div class="form-section">
+            <h3>Visual Identification</h3>
+            <input type="text" id="flat-color" placeholder="Door/Flat color (e.g., red, blue, white)">
+            <input type="text" id="gate-number" placeholder="Gate number">
+            <input type="text" id="staircase-color" placeholder="Staircase color (optional)">
+            <div class="checkbox-group">
+              <label>
+                <input type="checkbox" id="has-lift"> Has lift/elevator
+              </label>
+              <label>
+                <input type="checkbox" id="is-left-side"> Left side of building (if applicable)
+              </label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Additional Details</h3>
+            <input type="text" id="floor-number" placeholder="Floor number (optional)">
+            <input type="text" id="intercom-code" placeholder="Intercom code (if any)">
+            <input type="text" id="special-identifiers" placeholder="Landmark nearby, building nickname, etc.">
+          </div>
+
+          <div class="form-section">
+            <h3>Contact Information</h3>
+          <input type="text" id="customer-name" placeholder="Your full name" required>
+          <input type="tel" id="customer-phone" placeholder="Your phone number (10 digits)" required>
+          <button type="button" id="next-location-btn" class="btn btn-primary btn-block" aria-label="Set delivery location on map">Next: Set Location on Map</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Map & Location Page -->
+    <div id="map-page" class="page hidden">
+      <div class="container-full">
+        <div class="page-header">
+          <h1>Set Delivery Location</h1>
+          <p>Tap on the map to set your exact location</p>
+        </div>
+
+        <div id="map" class="map-container"></div>
+
+        <div class="map-controls">
+          <button id="get-current-location" class="btn btn-secondary" aria-label="Use current location">Use Current Location</button>
+          <button id="next-voice-btn" class="btn btn-primary btn-block" aria-label="Add voice guidance">Next: Add Voice Guidance</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice & Landmark Page -->
+    <div id="voice-page" class="page hidden">
+      <div class="container">
+        <div class="page-header">
+          <h1>Voice Guidance & Landmarks</h1>
+          <p>Help the delivery executive navigate to your door</p>
+        </div>
+
+        <div class="voice-section">
+          <h3>Upload Landmark Photo</h3>
+          <p class="hint">Upload a photo of a nearby landmark such as a shop, tree, gate, or parking area</p>
+          <div class="file-upload" id="landmark-upload">
+            <input type="file" id="landmark-file" accept="image/*" class="hidden">
+            <label for="landmark-file" class="file-label">
+              <span class="upload-icon">PHOTO</span>
+              <span>Choose photo from gallery</span>
+            </label>
+            <div id="landmark-preview" class="preview hidden"></div>
+          </div>
+        </div>
+
+        <div class="voice-section">
+          <h3>Record Voice Instruction</h3>
+          <p class="hint">Record a short voice message with directions such as "Dead end, left gate, lift to 4th floor, door 303"</p>
+          <div class="voice-controls">
+            <button id="start-recording" class="btn btn-recording" aria-label="Start voice recording">
+              <span class="mic-icon">MIC</span> Start Recording
+            </button>
+            <button id="stop-recording" class="btn btn-secondary hidden" aria-label="Stop recording">
+              <span>STOP</span> Stop Recording
+            </button>
+            <div id="recording-time" class="recording-time hidden">Recording... <span id="timer">0:00</span></div>
+          </div>
+          <div id="voice-playback" class="voice-playback hidden">
+            <audio id="voice-audio" controls></audio>
+            <button id="re-record-btn" class="btn btn-secondary" aria-label="Re-record voice instruction">Re-record</button>
+          </div>
+        </div>
+
+        <div class="voice-section">
+          <h3>One-Line Text Instruction</h3>
+          <textarea id="text-instruction" placeholder="Example: Dead end - left gate - lift to 4th floor - door 303" rows="3"></textarea>
+        </div>
+
+        <button id="next-confirm-btn" class="btn btn-primary btn-block" aria-label="Review and confirm order">Next: Review & Confirm</button>
+      </div>
+    </div>
+
+    <!-- Review & Confirm Page -->
+    <div id="review-page" class="page hidden">
+      <div class="container">
+        <div class="page-header">
+          <h1>Review Your Order</h1>
+          <p>Make sure everything looks correct before placing</p>
+        </div>
+
+        <div class="review-section">
+          <h3>Items</h3>
+          <ul id="review-items"></ul>
+          <p class="review-total">Total: <strong id="review-total">₹0</strong></p>
+        </div>
+
+        <div class="review-section">
+          <h3>Delivery Location</h3>
+          <div id="review-location"></div>
+        </div>
+
+        <div class="review-section">
+          <h3>Guidance</h3>
+          <div id="review-guidance"></div>
+        </div>
+
+        <button id="confirm-order-btn" class="btn btn-primary btn-block" aria-label="Confirm and place order">Confirm Order & Place Order</button>
+        <button id="back-btn" class="btn btn-secondary btn-block" aria-label="Go back">Back</button>
+      </div>
+    </div>
+
+    <!-- Order Processing Page -->
+    <div id="processing-page" class="page hidden">
+      <div class="container">
+        <div class="processing-container">
+          <div class="processing-animation">
+            <div class="spinner"></div>
+          </div>
+          <h2>Processing Your Order</h2>
+          <p>Finding a delivery partner for you</p>
+          <p id="processing-status" class="status-message"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Waiting Page -->
+    <div id="waiting-page" class="page hidden">
+      <div class="container">
+        <div class="waiting-container">
+          <div class="status-badge waiting">
+            <span class="badge-icon">WAIT</span>
+            <span class="badge-text">Waiting for delivery partner to accept</span>
+          </div>
+          <h2 id="order-id-display">Order</h2>
+          <p>SMS with Find Me link has been sent to the delivery executive</p>
+          <p class="hint">You will be notified when they arrive nearby</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Tracking Page (Customer View) -->
+    <div id="tracking-page" class="page hidden">
+      <div class="container-full">
+        <div class="tracking-header">
+          <h1>Delivery in Progress</h1>
+          <div id="tracking-status" class="tracking-status">Delivery partner on the way</div>
+        </div>
+
+        <div id="tracking-map" class="map-container"></div>
+
+        <div class="tracking-info">
+          <div class="info-card">
+            <h3>Delivery Partner</h3>
+            <p>Contact: <span id="delivery-phone" style="font-weight: 600;">--</span></p>
+          </div>
+          <div class="info-card">
+            <button id="call-delivery-btn" class="btn btn-secondary" aria-label="Call delivery partner">Call Delivery Partner</button>
+            <button id="share-location-btn" class="btn btn-secondary" aria-label="Share live location">Share Live Location</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delivery Executive Portal (Find Me Page) -->
+    <div id="findme-page" class="page hidden">
+      <div class="container-full">
+        <div class="findme-header">
+          <h1>PIN EXACT LOCATION</h1>
+        </div>
+
+        <div id="findme-map" class="map-container"></div>
+
+        <div class="findme-content">
+          <div class="guidance-card">
+            <h3>Instructions</h3>
+            <p id="findme-instruction" class="instruction-text"></p>
+          </div>
+
+          <div class="landmark-card">
+            <h3>Landmark Reference</h3>
+            <div id="findme-landmark" class="landmark-image-container"></div>
+          </div>
+
+          <div class="voice-card">
+            <h3>Voice Guidance</h3>
+            <div class="voice-player">
+              <audio id="findme-voice" controls></audio>
+            </div>
+          </div>
+
+          <div class="findme-buttons">
+            <button id="findme-near-btn" class="btn btn-success" aria-label="I am almost there">I AM ALMOST THERE</button>
+            <button id="findme-wrong-btn" class="btn btn-danger" aria-label="Wrong door need help">WRONG DOOR</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rating Page -->
+    <div id="rating-page" class="page hidden">
+      <div class="container">
+        <div class="rating-container">
+          <h1>How was your delivery?</h1>
+          <p>Your feedback helps us improve our service</p>
+
+          <div class="rating-stars">
+            <button class="star" data-rating="1" aria-label="Rating 1 star">STAR</button>
+            <button class="star" data-rating="2" aria-label="Rating 2 stars">STAR</button>
+            <button class="star" data-rating="3" aria-label="Rating 3 stars">STAR</button>
+            <button class="star" data-rating="4" aria-label="Rating 4 stars">STAR</button>
+            <button class="star" data-rating="5" aria-label="Rating 5 stars">STAR</button>
+          </div>
+          <p id="rating-text" class="rating-text hidden">--</p>
+
+          <textarea id="feedback-text" placeholder="Optional feedback about your experience" rows="3"></textarea>
+
+          <button id="submit-rating-btn" class="btn btn-primary btn-block" disabled aria-label="Submit rating">Submit Rating</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Completion Page -->
+    <div id="completion-page" class="page hidden">
+      <div class="container">
+        <div class="completion-container">
+          <div class="success-animation">
+            <div class="checkmark">OK</div>
+          </div>
+          <h1>Order Completed</h1>
+          <p>Thank you for using DoorPilot</p>
+          <button id="new-order-btn" class="btn btn-primary btn-block" aria-label="Place new order">Place New Order</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  
+  <script src="/js/db.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/map-utils.js"></script>
+  <script src="/js/voice-recorder.js"></script>
+  <script src="/js/app.js"></script>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').catch(err => {
+        console.log('Service Worker registration failed:', err);
+      });
+    }
+  </script>
+</body>
+</html>
