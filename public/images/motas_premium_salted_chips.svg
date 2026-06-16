@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240">
+  <rect width="200" height="240" fill="#FF6B35"/>
+  <text x="100" y="50" font-size="24" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">MOTA'S</text>
+  <text x="100" y="85" font-size="12" fill="white" text-anchor="middle" font-family="Arial">Premium Salted</text>
+  <ellipse cx="80" cy="125" rx="18" ry="28" fill="#FFB81C" stroke="#FF8C00" stroke-width="2"/>
+  <ellipse cx="120" cy="130" rx="18" ry="26" fill="#FFC93D" stroke="#FF8C00" stroke-width="2"/>
+  <circle cx="85" cy="120" r="2" fill="#FF8C00"/>
+  <circle cx="115" cy="125" r="2" fill="#FF8C00"/>
+  <rect y="200" width="200" height="40" fill="#8B4513"/>
+  <text x="100" y="225" font-size="12" fill="white" text-anchor="middle" font-family="Arial">Premium Taste</text>
+</svg>

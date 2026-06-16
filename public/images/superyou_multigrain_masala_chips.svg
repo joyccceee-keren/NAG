@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240">
+  <rect width="200" height="240" fill="#8B4513"/>
+  <text x="100" y="50" font-size="20" font-weight="bold" fill="#FFD700" text-anchor="middle" font-family="Arial">SUPERYOU</text>
+  <text x="100" y="85" font-size="12" fill="#FFD700" text-anchor="middle" font-family="Arial">Multigrain Masala</text>
+  <polygon points="75,110 95,145 115,140 120,105 95,100" fill="#CD853F" stroke="#8B4513" stroke-width="2"/>
+  <polygon points="85,125 110,150 125,135 115,110" fill="#DEB887" stroke="#8B4513" stroke-width="2"/>
+  <circle cx="90" cy="120" r="2" fill="#FFD700"/>
+  <circle cx="110" cy="130" r="2" fill="#FFD700"/>
+  <circle cx="100" cy="140" r="1.5" fill="#FFD700"/>
+  <rect y="200" width="200" height="40" fill="#654321"/>
+  <text x="100" y="225" font-size="12" fill="white" text-anchor="middle" font-family="Arial">Healthy Snack</text>
+</svg>

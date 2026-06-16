@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240">
+  <rect width="200" height="240" fill="#228B22"/>
+  <text x="100" y="50" font-size="20" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">BALAJI</text>
+  <text x="100" y="85" font-size="12" fill="white" text-anchor="middle" font-family="Arial">Rumbles Pudina</text>
+  <circle cx="80" cy="120" r="15" fill="#32CD32" stroke="#228B22" stroke-width="2"/>
+  <circle cx="120" cy="130" r="15" fill="#3CB371" stroke="#228B22" stroke-width="2"/>
+  <circle cx="100" cy="110" r="13" fill="#00FA9A" stroke="#228B22" stroke-width="2"/>
+  <circle cx="85" cy="125" r="2" fill="#FFD700"/>
+  <circle cx="110" cy="120" r="2" fill="#FFD700"/>
+  <rect y="200" width="200" height="40" fill="#1F5F1F"/>
+  <text x="100" y="225" font-size="12" fill="white" text-anchor="middle" font-family="Arial">Minty Fresh</text>
+</svg>
