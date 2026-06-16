@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <rect width="300" height="300" fill="#ffffff"/>
+  <!-- Shadow -->
+  <ellipse cx="150" cy="260" rx="65" ry="11" fill="#e0e0e0" opacity="0.6" filter="blur(6px)"/>
+  <!-- Bag Body -->
+  <path d="M100,60 L200,60 Q215,60 210,95 L190,230 Q185,250 150,250 Q115,250 110,230 L90,95 Q85,60 100,60 Z" fill="url(#bingoYellow)" stroke="#e65100" stroke-width="1.5"/>
+  <path d="M95,60 L205,60" stroke="#e65100" stroke-width="4" stroke-dasharray="2,2"/>
+  <path d="M106,248 L194,248" stroke="#e65100" stroke-width="4" stroke-dasharray="2,2"/>
+  <!-- Triangular shapes representing Mad Angles -->
+  <polygon points="120,130 180,110 160,170" fill="#E65100" opacity="0.15"/>
+  <polygon points="110,180 150,150 140,210" fill="#E65100" opacity="0.15"/>
+  <!-- Red Banner -->
+  <polygon points="105,100 195,115 185,150 115,140" fill="#D32F2F"/>
+  <text x="150" y="123" font-family="Impact, Arial Black, sans-serif" font-size="14" fill="#ffffff" transform="rotate(5 150 123)" text-anchor="middle">BINGO!</text>
+  <text x="150" y="138" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="7" fill="#FFEB3B" transform="rotate(5 150 138)" text-anchor="middle">MAD ANGLES</text>
+  <!-- Triangles illustration at bottom -->
+  <polygon points="135,215 165,190 160,225" fill="#FFCA28" stroke="#FFA000" stroke-width="1"/>
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="bingoYellow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFEB3B"/>
+      <stop offset="50%" stop-color="#FFC107"/>
+      <stop offset="100%" stop-color="#FF9800"/>
+    </linearGradient>
+  </defs>
+</svg>
