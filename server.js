@@ -50,10 +50,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use((req, _res, next) => { req.io = io; next(); });
 
 // ── API Routes ───────────────────────────────────────────────────────────────
-app.use('/api/orders',   require('./src/routes/orders'));
-app.use('/api/delivery', require('./src/routes/delivery'));
-app.use('/api/upload',   require('./src/routes/uploads'));
-app.use('/api/sms',      require('./src/routes/sms'));
+app.use('/api/orders',    require('./src/routes/orders'));
+app.use('/api/delivery',  require('./src/routes/delivery'));
+app.use('/api/upload',    require('./src/routes/uploads'));
+app.use('/api/sms',       require('./src/routes/sms'));
+app.use('/api/whatsapp',  require('./src/routes/whatsapp'));
 
 // ── Geocoding (Nominatim — free, no key needed) ──────────────────────────────
 app.get('/api/geocode', async (req, res) => {
@@ -136,12 +137,23 @@ io.on('connection', (socket) => {
 });
 
 // ── Start ────────────────────────────────────────────────────────────────────
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', async () => {
   console.log(`\n🚀 DoorPilot is running!`);
   console.log(`   Local:   http://localhost:${PORT}`);
   console.log(`   Network: http://${LAN_IP}:${PORT}  ← share with your mate`);
   console.log(`   BASE_URL: ${process.env.BASE_URL}`);
   console.log(`\n📦 SMS provider: ${process.env.SMS_PROVIDER || 'simulated'}`);
   console.log(`🗺️  Geocoding: Nominatim (free)`);
-  console.log(`📡 Routes: /api/orders  /api/delivery  /api/upload  /api/sms\n`);
+  console.log(`💬 WhatsApp: Available via POST /api/whatsapp/send`);
+  console.log(`📡 Routes: /api/orders  /api/delivery  /api/upload  /api/sms  /api/whatsapp\n`);
+
+  // Optional: Auto-initialize WhatsApp if env var is set
+  if (process.env.WHATSAPP_AUTO_INIT === 'true') {
+    try {
+      const whatsappService = require('./src/models/WhatsAppService');
+      await whatsappService.initialize();
+    } catch (error) {
+      console.warn('⚠️ WhatsApp auto-init failed:', error.message);
+    }
+  }
 });
