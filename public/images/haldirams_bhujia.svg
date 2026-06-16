@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240">
+  <!-- Package background -->
+  <rect width="200" height="240" fill="#E8752E"/>
+  
+  <!-- Haldirams branding -->
+  <text x="100" y="50" font-size="24" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">HALDIRAMS</text>
+  <text x="100" y="85" font-size="14" fill="white" text-anchor="middle" font-family="Arial">Bhujia Sev</text>
+  
+  <!-- Bhujia noodles illustration -->
+  <line x1="70" y1="110" x2="100" y2="140" stroke="#D4A574" stroke-width="4" stroke-linecap="round"/>
+  <line x1="100" y1="110" x2="130" y2="135" stroke="#D4A574" stroke-width="4" stroke-linecap="round"/>
+  <line x1="75" y1="130" x2="110" y2="155" stroke="#C9934B" stroke-width="4" stroke-linecap="round"/>
+  <line x1="105" y1="130" x2="135" y2="145" stroke="#C9934B" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Spice notes -->
+  <circle cx="85" cy="120" r="2" fill="#8B4513" opacity="0.7"/>
+  <circle cx="115" cy="125" r="2" fill="#8B4513" opacity="0.7"/>
+  
+  <!-- Bottom banner -->
+  <rect y="200" width="200" height="40" fill="#8B6914"/>
+  <text x="100" y="225" font-size="12" fill="white" text-anchor="middle" font-family="Arial">Savory Delight</text>
+</svg>
