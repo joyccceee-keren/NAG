@@ -1,5 +1,6 @@
 const { ordersDb, ratingsDb } = require('../models/Database');
 const smsGateway = require('../models/SMSGateway');
+const whatsAppService = require('../models/WhatsAppService');
 const { v4: uuidv4 } = require('uuid');
 
 // ── Items catalog ────────────────────────────────────────────────────────────
@@ -183,6 +184,16 @@ exports.createOrder = async (req, res) => {
       rating:          null
     });
 
+    // Send WhatsApp order confirmation to customer
+    if (customerPhone && whatsAppService.getStatus().isReady) {
+      try {
+        await whatsAppService.sendOrderConfirmation(customerPhone, order.id, items || [], totalAmount);
+        console.log(`✅ WhatsApp order confirmation sent to ${customerPhone}`);
+      } catch (waErr) {
+        console.warn('WhatsApp confirmation failed (non-fatal):', waErr.message);
+      }
+    }
+
     res.json({ success: true, orderId: order.id, order });
   } catch (err) {
     console.error('createOrder error:', err);
@@ -219,7 +230,7 @@ exports.getOrderByToken = (req, res) => {
 };
 
 // POST /api/orders/assign-delivery
-// Assigns a delivery executive, generates Find Me link, sends SMS
+// Assigns a delivery executive, generates Find Me link, sends SMS and WhatsApp
 exports.assignDeliveryExecutive = async (req, res) => {
   try {
     let { orderId, deliveryExecutivePhone, deliveryExecutiveId } = req.body;
@@ -259,6 +270,33 @@ exports.assignDeliveryExecutive = async (req, res) => {
       await smsGateway.sendSMS(deliveryExecutivePhone, smsMessage);
     } catch (smsErr) {
       console.error('SMS failed (non-fatal):', smsErr.message);
+    }
+
+    // Send WhatsApp message with complete order details to delivery executive
+    if (deliveryExecutivePhone && whatsAppService.getStatus().isReady) {
+      try {
+        // Build detailed order message for delivery executive
+        const itemsList = (order.items || [])
+          .map(item => `• ${item.name} x${item.quantity} = ₹${item.price * item.quantity}`)
+          .join('\n');
+        
+        const whatsAppMessage = 
+          `🚚 *DoorPilot Delivery Order*\n\n` +
+          `*Order ID:* #${order.id}\n` +
+          `*Customer:* ${order.customerName || 'Customer'}\n` +
+          `*Phone:* ${order.customerPhone || 'N/A'}\n\n` +
+          `*Items:*\n${itemsList}\n\n` +
+          `*Total:* ₹${order.totalAmount}\n\n` +
+          `📍 *Delivery Link:*\n${findMeLink}\n\n` +
+          `Click to navigate to customer location. 👆`;
+
+        const result = await whatsAppService.sendMessage(deliveryExecutivePhone, whatsAppMessage);
+        if (result.success) {
+          console.log(`✅ WhatsApp delivery message sent to ${deliveryExecutivePhone}`);
+        }
+      } catch (waErr) {
+        console.warn('WhatsApp delivery message failed (non-fatal):', waErr.message);
+      }
     }
 
     // Emit via Socket.IO if available
