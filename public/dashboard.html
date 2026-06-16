@@ -326,6 +326,66 @@
   </div>
 
   <script>
+    // Global toast notification function (for iframe compatibility)
+    function showToast(message, duration = 3000) {
+      // Remove existing toasts
+      document.querySelectorAll('.toast').forEach(t => t.remove());
+      
+      // Create toast element
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #333;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      `;
+      
+      document.body.appendChild(toast);
+      
+      // Remove after duration
+      if (duration > 0) {
+        setTimeout(() => {
+          toast.style.animation = 'slideOut 0.3s ease';
+          setTimeout(() => toast.remove(), 300);
+        }, duration);
+      }
+    }
+
+    // Add slide animations to stylesheet
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
     function activatePanel(panelName) {
       // Hide all panels
       const panels = document.querySelectorAll('.panel');
@@ -393,7 +453,7 @@
     // Check every 30 seconds
     setInterval(checkWhatsAppStatus, 30000);
 
-    console.log('DoorPilot Dashboard loaded successfully');
+    console.log('DoorPilot Dashboard initialized');
   </script>
 </body>
 </html>
