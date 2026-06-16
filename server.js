@@ -46,6 +46,11 @@ app.use((req, res, next) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Serve dashboard as default home page
+app.get('/', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
 // Attach io to every request so controllers can emit events
 app.use((req, _res, next) => { req.io = io; next(); });
 

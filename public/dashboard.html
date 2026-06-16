@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DoorPilot - Unified Dashboard</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f8f9fa;
+    }
+
+    .dashboard {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 80px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .logo-icon {
+      width: 50px;
+      height: 50px;
+      background: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 30px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .logo-icon:hover {
+      transform: scale(1.1);
+    }
+
+    .nav-item {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 24px;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      right: -20px;
+      width: 4px;
+      height: 100%;
+      background: white;
+      border-radius: 2px;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      background: white;
+      padding: 20px 40px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      color: #333;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .status-badge {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-badge.active {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-badge.inactive {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    /* Content Panels */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0;
+    }
+
+    .panel {
+      display: none;
+      height: 100%;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .panel.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Customer App Panel */
+    .customer-panel {
+      flex-direction: column;
+    }
+
+    .customer-panel iframe {
+      flex: 1;
+      border: none;
+    }
+
+    /* Delivery Panel */
+    .delivery-panel {
+      flex-direction: column;
+    }
+
+    .delivery-panel iframe {
+      flex: 1;
+      border: none;
+    }
+
+    /* WhatsApp Panel */
+    .whatsapp-panel {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .whatsapp-panel iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 10px;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      background: #333;
+      color: white;
+      border-radius: 8px;
+      display: none;
+      z-index: 2000;
+      animation: slideIn 0.3s ease;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+      }
+      to {
+        transform: translateX(0);
+      }
+    }
+
+    .toast.success {
+      background: #28a745;
+    }
+
+    .toast.error {
+      background: #dc3545;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 60px;
+      }
+
+      .header {
+        padding: 15px 20px;
+      }
+
+      .header h1 {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+      <div class="logo-icon" onclick="showPanel('home')" title="DoorPilot">🚚</div>
+      
+      <div class="nav-item active" onclick="showPanel('customer')" title="Main App">
+        🛍️
+      </div>
+      
+      <div class="nav-item" onclick="showPanel('delivery')" title="Delivery Tracking">
+        📍
+      </div>
+      
+      <div class="nav-item" onclick="showPanel('whatsapp')" title="WhatsApp QR">
+        💬
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header -->
+      <div class="header">
+        <div>
+          <h1 id="panelTitle">DoorPilot - Main App</h1>
+        </div>
+        <div class="header-actions">
+          <div id="whatsappStatus" class="status-badge inactive">
+            WhatsApp: Offline
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Customer App Panel -->
+        <div id="customer" class="panel customer-panel active">
+          <iframe src="/index.html" title="DoorPilot Main App"></iframe>
+        </div>
+
+        <!-- Delivery Tracking Panel -->
+        <div id="delivery" class="panel delivery-panel">
+          <iframe src="/delivery.html" title="Delivery Tracking"></iframe>
+        </div>
+
+        <!-- WhatsApp QR Scanner Panel -->
+        <div id="whatsapp" class="panel whatsapp-panel">
+          <iframe src="/whatsapp-qr.html" title="WhatsApp QR Scanner"></iframe>
+        </div>
+
+        <!-- Home Dashboard Panel -->
+        <div id="home" class="panel" style="flex-direction: column; align-items: center; justify-content: center; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+          <div style="text-align: center;">
+            <div style="font-size: 80px; margin-bottom: 20px;">🚚</div>
+            <h2 style="font-size: 32px; margin-bottom: 10px;">Welcome to DoorPilot</h2>
+            <p style="font-size: 16px; opacity: 0.9; margin-bottom: 40px;">Select an option from the sidebar to get started</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; max-width: 800px; margin: 0 auto;">
+              <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; cursor: pointer;" onclick="showPanel('customer')">
+                <div style="font-size: 40px; margin-bottom: 10px;">🛍️</div>
+                <h3>Main App</h3>
+                <p style="font-size: 12px; opacity: 0.8;">Browse & order</p>
+              </div>
+              
+              <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; cursor: pointer;" onclick="showPanel('delivery')">
+                <div style="font-size: 40px; margin-bottom: 10px;">📍</div>
+                <h3>Delivery</h3>
+                <p style="font-size: 12px; opacity: 0.8;">Track orders</p>
+              </div>
+              
+              <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; cursor: pointer;" onclick="showPanel('whatsapp')">
+                <div style="font-size: 40px; margin-bottom: 10px;">💬</div>
+                <h3>WhatsApp</h3>
+                <p style="font-size: 12px; opacity: 0.8;">Register partner</p>
+              </div>
+            </div>
+
+            <div style="margin-top: 40px; font-size: 12px; opacity: 0.7;">
+              <p>Server running on port 3001 • All systems operational</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    function showPanel(panelName) {
+      // Hide all panels
+      const panels = document.querySelectorAll('.panel');
+      panels.forEach(panel => panel.classList.remove('active'));
+      
+      // Hide all nav items active state
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => item.classList.remove('active'));
+      
+      // Show selected panel
+      const selectedPanel = document.getElementById(panelName);
+      if (selectedPanel) {
+        selectedPanel.classList.add('active');
+      }
+      
+      // Update active nav item
+      event.target.closest('.nav-item')?.classList.add('active');
+      
+      // Update header title
+      const titles = {
+        'home': '🚚 DoorPilot Dashboard',
+        'customer': '🛍️ Main App - Browse & Order',
+        'delivery': '📍 Delivery Tracking - Track Orders',
+        'whatsapp': '💬 WhatsApp QR - Register Partner'
+      };
+      document.getElementById('panelTitle').textContent = titles[panelName] || 'DoorPilot';
+    }
+
+    // Check WhatsApp status periodically
+    async function checkWhatsAppStatus() {
+      try {
+        const response = await fetch('/api/whatsapp/status');
+        const data = await response.json();
+        
+        const badge = document.getElementById('whatsappStatus');
+        if (data.isReady) {
+          badge.textContent = 'WhatsApp: Ready ✓';
+          badge.className = 'status-badge active';
+        } else if (data.hasQRCode) {
+          badge.textContent = 'WhatsApp: Waiting QR...';
+          badge.className = 'status-badge inactive';
+        } else {
+          badge.textContent = 'WhatsApp: Not initialized';
+          badge.className = 'status-badge inactive';
+        }
+      } catch (error) {
+        document.getElementById('whatsappStatus').textContent = 'WhatsApp: Error';
+      }
+    }
+
+    // Initial status check
+    checkWhatsAppStatus();
+    
+    // Check every 30 seconds
+    setInterval(checkWhatsAppStatus, 30000);
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast show ${type}`;
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Log initialization
+    console.log('DoorPilot Dashboard initialized');
+    console.log('Available panels: home, customer, delivery, whatsapp');
+  </script>
+</body>
+</html>
