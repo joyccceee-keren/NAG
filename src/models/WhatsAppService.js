@@ -8,6 +8,8 @@ class WhatsAppService {
     this.isReady = false;
     this.businessNumber = process.env.WHATSAPP_BUSINESS_NUMBER || '919876543210'; // Default test number
     this.sessionPath = path.join(__dirname, '../../.whatsapp-session');
+    this.currentQR = null;
+    this.currentQRText = null;
   }
 
   async initialize() {
@@ -24,7 +26,19 @@ class WhatsAppService {
 
       this.client.on('qr', (qr) => {
         console.log('\n📱 QR Code generated. Scan with your WhatsApp:');
-        console.log('QR Code:', qr);
+        console.log('QR Code Text:', qr);
+        console.log('\nAlternatively, visit: http://localhost:3001/api/whatsapp/qr to see image');
+        
+        // Store QR code for retrieval via API
+        this.currentQRText = qr;
+        
+        // Generate QR code image
+        const qrcode = require('qrcode');
+        qrcode.toBuffer(qr, { errorCorrectionLevel: 'H', width: 300 })
+          .then(buffer => {
+            this.currentQR = buffer;
+          })
+          .catch(err => console.error('Error generating QR image:', err));
       });
 
       this.client.on('authenticated', () => {
@@ -146,8 +160,17 @@ class WhatsAppService {
     return {
       isReady: this.isReady,
       businessNumber: this.businessNumber,
-      message: this.isReady ? 'WhatsApp is ready to send messages' : 'WhatsApp is not ready'
+      message: this.isReady ? 'WhatsApp is ready to send messages' : 'WhatsApp is not ready',
+      hasQRCode: !!this.currentQRText
     };
+  }
+
+  getCurrentQR() {
+    return this.currentQR;
+  }
+
+  getCurrentQRText() {
+    return this.currentQRText;
   }
 }
 

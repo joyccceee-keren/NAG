@@ -1,5 +1,6 @@
 const express = require('express');
 const whatsappService = require('../models/WhatsAppService');
+const qrcode = require('qrcode');
 const router = express.Router();
 
 /**
@@ -10,6 +11,48 @@ router.get('/status', (req, res) => {
   try {
     const status = whatsappService.getStatus();
     res.json(status);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/whatsapp/qr
+ * Get WhatsApp QR code as image
+ */
+router.get('/qr', (req, res) => {
+  try {
+    const qrData = whatsappService.getCurrentQR();
+    if (!qrData) {
+      return res.status(400).json({ 
+        error: 'QR code not available. Initialize WhatsApp first.' 
+      });
+    }
+    
+    res.setHeader('Content-Type', 'image/png');
+    res.send(qrData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/whatsapp/qr-text
+ * Get WhatsApp QR code as text
+ */
+router.get('/qr-text', (req, res) => {
+  try {
+    const qrText = whatsappService.getCurrentQRText();
+    if (!qrText) {
+      return res.status(400).json({ 
+        error: 'QR code not available. Initialize WhatsApp first.' 
+      });
+    }
+    
+    res.json({ 
+      qrCode: qrText,
+      message: 'Scan this QR code with WhatsApp on your phone'
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

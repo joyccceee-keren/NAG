@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp QR Code - DoorPilot</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .header {
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+
+    .qr-section {
+      margin-bottom: 30px;
+    }
+
+    .qr-image {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      border: 2px solid #f0f0f0;
+      margin-bottom: 20px;
+      min-height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-image img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .qr-loading {
+      color: #999;
+      font-size: 14px;
+    }
+
+    .instructions {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .instructions h3 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    .instructions ol {
+      margin-left: 20px;
+      color: #666;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .instructions li {
+      margin-bottom: 10px;
+    }
+
+    .status {
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+      display: block;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+      background: #f8f9fa;
+    }
+
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #f0f0f0;
+      color: #999;
+      font-size: 12px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .qr-text {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      word-break: break-all;
+      font-size: 12px;
+      color: #666;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">📱</div>
+      <h1>WhatsApp QR Code</h1>
+      <p class="subtitle">Scan to register as delivery partner</p>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <div class="qr-section">
+      <div class="qr-image" id="qrContainer">
+        <div class="qr-loading">
+          <div class="spinner"></div>
+          <p style="margin-top: 10px;">Loading QR code...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="instructions">
+      <h3>📲 How to Scan:</h3>
+      <ol>
+        <li>Open WhatsApp on your phone</li>
+        <li>Go to <strong>Settings → Linked Devices</strong></li>
+        <li>Tap <strong>Link a Device</strong></li>
+        <li><strong>Point camera at QR code</strong> and scan</li>
+        <li>Wait for authentication to complete</li>
+      </ol>
+    </div>
+
+    <div class="button-group">
+      <button class="btn-primary" onclick="refreshQR()">🔄 Refresh QR</button>
+      <button class="btn-secondary" onclick="checkStatus()">✓ Check Status</button>
+    </div>
+
+    <div class="footer">
+      <p>Keep this page open while scanning the QR code</p>
+      <p style="margin-top: 5px;">🔒 Your data stays secure • No tracking</p>
+    </div>
+  </div>
+
+  <script>
+    const QR_IMAGE_URL = '/api/whatsapp/qr';
+    const QR_TEXT_URL = '/api/whatsapp/qr-text';
+    const STATUS_URL = '/api/whatsapp/status';
+
+    let refreshInterval = null;
+
+    async function loadQRImage() {
+      try {
+        const response = await fetch(QR_IMAGE_URL);
+        
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          
+          document.getElementById('qrContainer').innerHTML = 
+            `<img src="${url}" alt="WhatsApp QR Code" style="max-width: 100%; height: auto;">`;
+          
+          showStatus('QR code loaded successfully', 'success');
+        } else {
+          loadQRText();
+        }
+      } catch (error) {
+        console.error('Error loading QR image:', error);
+        loadQRText();
+      }
+    }
+
+    async function loadQRText() {
+      try {
+        const response = await fetch(QR_TEXT_URL);
+        const data = await response.json();
+        
+        if (data.qrCode) {
+          document.getElementById('qrContainer').innerHTML = 
+            `<div class="qr-text">QR Code: ${data.qrCode}</div>`;
+          showStatus('QR code text (copy to generate image)', 'info');
+        } else {
+          showStatus(data.error || 'QR code not available', 'error');
+        }
+      } catch (error) {
+        console.error('Error loading QR text:', error);
+        showStatus('Failed to load QR code: ' + error.message, 'error');
+      }
+    }
+
+    async function checkStatus() {
+      try {
+        const response = await fetch(STATUS_URL);
+        const data = await response.json();
+        
+        if (data.isReady) {
+          showStatus('✅ WhatsApp is ready! You can now send messages.', 'success');
+        } else if (data.hasQRCode) {
+          showStatus('⏳ Waiting for QR code scan... Please scan with your phone.', 'info');
+        } else {
+          showStatus('❌ WhatsApp not initialized. Refreshing QR code...', 'error');
+          refreshQR();
+        }
+      } catch (error) {
+        showStatus('Error checking status: ' + error.message, 'error');
+      }
+    }
+
+    function refreshQR() {
+      document.getElementById('qrContainer').innerHTML = 
+        '<div class="qr-loading"><div class="spinner"></div><p style="margin-top: 10px;">Refreshing QR code...</p></div>';
+      
+      fetch('/api/whatsapp/initialize', { method: 'POST' })
+        .then(() => {
+          setTimeout(loadQRImage, 1000);
+        })
+        .catch(error => {
+          showStatus('Error refreshing QR: ' + error.message, 'error');
+        });
+    }
+
+    function showStatus(message, type) {
+      const statusDiv = document.getElementById('status');
+      statusDiv.textContent = message;
+      statusDiv.className = 'status ' + type;
+    }
+
+    // Auto-refresh QR code every 30 seconds
+    function startAutoRefresh() {
+      if (refreshInterval) clearInterval(refreshInterval);
+      
+      refreshInterval = setInterval(() => {
+        checkStatus();
+      }, 30000);
+    }
+
+    // Load QR code on page load
+    window.addEventListener('load', () => {
+      loadQRImage();
+      startAutoRefresh();
+      
+      // Check status immediately
+      setTimeout(checkStatus, 2000);
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (refreshInterval) clearInterval(refreshInterval);
+    });
+  </script>
+</body>
+</html>
