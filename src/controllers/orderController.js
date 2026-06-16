@@ -19,10 +19,10 @@ const ITEMS_CATALOG = {
     { id: 'banana-01',   name: 'Bananas - 6 pcs',          price: 40,  img: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400&auto=format&fit=crop' },
     { id: 'apple-01',    name: 'Apples - 4 pcs',           price: 80,  img: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&auto=format&fit=crop' },
     { id: 'rice-01',     name: 'Basmati Rice - 1kg',       price: 90,  img: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&auto=format&fit=crop' },
-    { id: 'sugar-01',    name: 'Sugar - 1kg',              price: 45,  img: 'https://images.pexels.com/photos/209206/pexels-photo-209206.jpeg?auto=compress&cs=tinysrgb&w=400' },
+    { id: 'sugar-01',    name: 'Sugar - 1kg',              price: 45,  img: 'https://images.pexels.com/photos/3962286/pexels-photo-3962286.jpeg?auto=compress&cs=tinysrgb&w=400' },
     { id: 'oil-01',      name: 'Sunflower Oil - 1L',       price: 130, img: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&auto=format&fit=crop' },
     { id: 'curd-01',     name: 'Fresh Curd - 400g',        price: 40,  img: 'https://images.unsplash.com/photo-1571212515416-fef01fc43637?w=400&auto=format&fit=crop' },
-    { id: 'cucumber-01', name: 'Cucumber - 2 pcs',         price: 20,  img: 'https://images.pexels.com/photos/3721622/pexels-photo-3721622.jpeg?auto=compress&cs=tinysrgb&w=400' },
+    { id: 'cucumber-01', name: 'Cucumber - 2 pcs',         price: 20,  img: 'https://images.pexels.com/photos/4198933/pexels-photo-4198933.jpeg?auto=compress&cs=tinysrgb&w=400' },
     { id: 'lemon-01',    name: 'Lemons - 4 pcs',           price: 20,  img: 'https://images.unsplash.com/photo-1590502593747-42a996133562?w=400&auto=format&fit=crop' }
   ],
   "🍔 Food": [
