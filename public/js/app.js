@@ -272,27 +272,27 @@ class DoorPilotApp {
           { id: 'zinc-01',         name: 'Zinc Supplement 25 tabs',   price: 90,  img: 'https://images.pexels.com/photos/159211/headache-pain-pills-medication-159211.jpeg?auto=compress&cs=tinysrgb&w=400' },
           { id: 'glucose-strip-01',name: 'Glucose Test Strips 25pcs', price: 220, img: 'https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?auto=compress&cs=tinysrgb&w=400' }
         ],
-        "📄 Documents": [
-          { id: 'print-01',       name: 'Document Printing - A4',    price: 5,   img: 'https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'envelope-01',    name: 'Courier Envelope - A4',     price: 15,  img: 'https://images.pexels.com/photos/1591062/pexels-photo-1591062.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'stamp-01',       name: 'Postage Stamp',             price: 10,  img: 'https://images.pexels.com/photos/1591062/pexels-photo-1591062.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'folder-01',      name: 'Document Folder',           price: 30,  img: 'https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'pen-01',         name: 'Ball Pen - Pack of 5',      price: 30,  img: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'stapler-01',     name: 'Mini Stapler with Pins',    price: 85,  img: 'https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'tape-01',        name: 'Clear Tape - 2 rolls',      price: 25,  img: 'https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'highlighter-01', name: 'Highlighter - 4 colours',   price: 60,  img: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'sticky-01',      name: 'Sticky Notes - 100 sheets', price: 40,  img: 'https://images.pexels.com/photos/4057758/pexels-photo-4057758.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'notebook-01',    name: 'A5 Ruled Notebook',         price: 55,  img: 'https://images.pexels.com/photos/1925536/pexels-photo-1925536.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'scissor-01',     name: 'Office Scissors',           price: 45,  img: 'https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'paperclip-01',   name: 'Paper Clips - 50 pcs',      price: 20,  img: 'https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'marker-01',      name: 'Permanent Markers - 2 pcs', price: 40,  img: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'lamination-01',  name: 'Lamination Sheet - A4 x10', price: 60,  img: 'https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'bindingclip-01', name: 'Binder Clips - 12 pcs',     price: 35,  img: 'https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'rubber-01',      name: 'Eraser Pack - 5 pcs',       price: 15,  img: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'pencil-01',      name: 'HB Pencils - Pack of 10',   price: 40,  img: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'courier-bag-01', name: 'Padded Courier Bag - A4',   price: 25,  img: 'https://images.pexels.com/photos/1591062/pexels-photo-1591062.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'whitener-01',    name: 'Correction Pen',            price: 30,  img: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=400' },
-          { id: 'scale-01',       name: '30cm Ruler',                price: 20,  img: 'https://images.pexels.com/photos/4057758/pexels-photo-4057758.jpeg?auto=compress&cs=tinysrgb&w=400' }
+        "💊 Medicines": [
+          { id: 'paracetamol-01',  name: 'Paracetamol 650mg',         price: 25,  img: 'https://images.pexels.com/photos/159211/headache-pain-pills-medication-159211.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'bandaid-01',      name: 'Band-Aid Flex 100pcs',      price: 35,  img: 'https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'cough-01',        name: 'Benadryl Cough Syrup',      price: 85,  img: 'https://images.pexels.com/photos/3683074/pexels-photo-3683074.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'sanitizer-01',    name: 'Hand Sanitizer 100ml',      price: 60,  img: 'https://images.pexels.com/photos/3873193/pexels-photo-3873193.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'vitaminc-01',     name: 'Vitamin C 500mg',           price: 50,  img: 'https://images.pexels.com/photos/3683074/pexels-photo-3683074.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'antacid-01',      name: 'Antacid Syrup 200ml',       price: 75,  img: 'https://images.pexels.com/photos/3683074/pexels-photo-3683074.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'ibuprofen-01',    name: 'Ibuprofen 400mg - 10 tabs', price: 30,  img: 'https://images.pexels.com/photos/159211/headache-pain-pills-medication-159211.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'thermometer-01',  name: 'Digital Thermometer',       price: 250, img: 'https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'mask-01',         name: 'N95 Face Mask - 5 pcs',     price: 120, img: 'https://images.pexels.com/photos/3873193/pexels-photo-3873193.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'eyedrops-01',     name: 'Lubricant Eye Drops',       price: 90,  img: 'https://images.pexels.com/photos/3683074/pexels-photo-3683074.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'ors-01',          name: 'ORS Sachets - 5 pcs',       price: 40,  img: 'https://images.pexels.com/photos/159211/headache-pain-pills-medication-159211.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'antifungal-01',   name: 'Antifungal Cream 15g',      price: 65,  img: 'https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'bp-tablet-01',    name: 'Aspirin 75mg - 14 tabs',    price: 45,  img: 'https://images.pexels.com/photos/159211/headache-pain-pills-medication-159211.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'nasal-01',        name: 'Nasal Drops 10ml',          price: 55,  img: 'https://images.pexels.com/photos/3683074/pexels-photo-3683074.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'glucon-01',       name: 'Glucon-D Energy Drink',     price: 70,  img: 'https://images.pexels.com/photos/3873193/pexels-photo-3873193.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'cotton-01',       name: 'Surgical Cotton - 50g',     price: 30,  img: 'https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'vicks-01',        name: 'Vicks VapoRub 25g',         price: 55,  img: 'https://images.pexels.com/photos/3683074/pexels-photo-3683074.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'multivit-01',     name: 'Multivitamin Tablets - 30', price: 180, img: 'https://images.pexels.com/photos/159211/headache-pain-pills-medication-159211.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'zinc-01',         name: 'Zinc Supplement 25 tabs',   price: 90,  img: 'https://images.pexels.com/photos/159211/headache-pain-pills-medication-159211.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'glucose-strip-01',name: 'Glucose Test Strips 25pcs', price: 220, img: 'https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?auto=compress&cs=tinysrgb&w=400' }
         ]
       };
     }

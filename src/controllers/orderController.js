@@ -140,28 +140,6 @@ const ITEMS_CATALOG = {
     { id: 'multivit-01',     name: 'Multivitamin Tablets - 30', price: 180, img: 'https://images.pexels.com/photos/159211/headache-pain-pills-medication-159211.jpeg?auto=compress&cs=tinysrgb&w=400' },
     { id: 'zinc-01',         name: 'Zinc Supplement 25 tabs',   price: 90,  img: 'https://images.pexels.com/photos/159211/headache-pain-pills-medication-159211.jpeg?auto=compress&cs=tinysrgb&w=400' },
     { id: 'glucose-strip-01',name: 'Glucose Test Strips 25pcs', price: 220, img: 'https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?auto=compress&cs=tinysrgb&w=400' }
-  ],
-  "📄 Documents": [
-    { id: 'print-01',       name: 'Document Printing - A4',     price: 5,   img: 'https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'envelope-01',    name: 'Courier Envelope - A4',      price: 15,  img: 'https://images.pexels.com/photos/1591062/pexels-photo-1591062.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'stamp-01',       name: 'Postage Stamp',              price: 10,  img: 'https://images.pexels.com/photos/1591062/pexels-photo-1591062.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'folder-01',      name: 'Document Folder',            price: 30,  img: 'https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'pen-01',         name: 'Ball Pen - Pack of 5',       price: 30,  img: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'stapler-01',     name: 'Mini Stapler with Pins',     price: 85,  img: 'https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'tape-01',        name: 'Clear Tape - 2 rolls',       price: 25,  img: 'https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'highlighter-01', name: 'Highlighter - 4 colours',    price: 60,  img: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'sticky-01',      name: 'Sticky Notes - 100 sheets',  price: 40,  img: 'https://images.pexels.com/photos/4057758/pexels-photo-4057758.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'notebook-01',    name: 'A5 Ruled Notebook',          price: 55,  img: 'https://images.pexels.com/photos/1925536/pexels-photo-1925536.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'scissor-01',     name: 'Office Scissors',            price: 45,  img: 'https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'paperclip-01',   name: 'Paper Clips - 50 pcs',       price: 20,  img: 'https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'marker-01',      name: 'Permanent Markers - 2 pcs',  price: 40,  img: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'lamination-01',  name: 'Lamination Sheet - A4 x10',  price: 60,  img: 'https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'bindingclip-01', name: 'Binder Clips - 12 pcs',      price: 35,  img: 'https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'rubber-01',      name: 'Eraser Pack - 5 pcs',        price: 15,  img: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'pencil-01',      name: 'HB Pencils - Pack of 10',    price: 40,  img: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'courier-bag-01', name: 'Padded Courier Bag - A4',    price: 25,  img: 'https://images.pexels.com/photos/1591062/pexels-photo-1591062.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'whitener-01',    name: 'Correction Pen',             price: 30,  img: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { id: 'scale-01',       name: '30cm Ruler',                 price: 20,  img: 'https://images.pexels.com/photos/4057758/pexels-photo-4057758.jpeg?auto=compress&cs=tinysrgb&w=400' }
   ]
 };
 
