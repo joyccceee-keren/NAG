@@ -338,11 +338,12 @@
 
     // Load QR code on page load
     window.addEventListener('load', () => {
-      loadQRImage();
+      // First initialize WhatsApp and generate QR
+      refreshQR();
       startAutoRefresh();
       
-      // Check status immediately
-      setTimeout(checkStatus, 2000);
+      // Check status after 3 seconds
+      setTimeout(checkStatus, 3000);
     });
 
     // Cleanup on page unload
