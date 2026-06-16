@@ -152,7 +152,7 @@ class DoorPilotApp {
           { id: 'sugar-01',    name: 'Sugar - 1kg',             price: 45,  img: 'https://images.pexels.com/photos/821364/pexels-photo-821364.jpeg?auto=compress&cs=tinysrgb&w=400' },
           { id: 'oil-01',      name: 'Sunflower Oil - 1L',      price: 130, img: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&auto=format&fit=crop' },
           { id: 'curd-01',     name: 'Fresh Curd - 400g',       price: 40,  img: 'https://images.unsplash.com/photo-1571212515416-fef01fc43637?w=400&auto=format&fit=crop' },
-          { id: 'cucumber-01', name: 'Cucumber - 2 pcs',        price: 20,  img: 'https://images.pexels.com/photos/5490965/pexels-photo-5490965.jpeg?auto=compress&cs=tinysrgb&w=400' },
+          { id: 'cucumber-01', name: 'Cucumber - 2 pcs',        price: 20,  img: 'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&auto=format&fit=crop' },
           { id: 'lemon-01',    name: 'Lemons - 4 pcs',          price: 20,  img: 'https://images.unsplash.com/photo-1590502593747-42a996133562?w=400&auto=format&fit=crop' }
         ],
         "🍔 Food": [
