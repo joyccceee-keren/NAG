@@ -51,6 +51,33 @@ app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
+// Serve whatsapp-qr.html with proper headers
+app.get('/whatsapp-qr.html', (_req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.set('X-Frame-Options', 'SAMEORIGIN');
+  res.sendFile(path.join(__dirname, 'public', 'whatsapp-qr.html'));
+});
+
+// Serve delivery.html with proper headers
+app.get('/delivery.html', (_req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.set('X-Frame-Options', 'SAMEORIGIN');
+  res.sendFile(path.join(__dirname, 'public', 'delivery.html'));
+});
+
+// Serve index.html with proper headers
+app.get('/index.html', (_req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.set('X-Frame-Options', 'SAMEORIGIN');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Attach io to every request so controllers can emit events
 app.use((req, _res, next) => { req.io = io; next(); });
 
