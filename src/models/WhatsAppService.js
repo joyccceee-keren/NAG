@@ -6,7 +6,8 @@ class WhatsAppService {
   constructor() {
     this.client = null;
     this.isReady = false;
-    this.businessNumber = process.env.WHATSAPP_BUSINESS_NUMBER || '919876543210'; // Default test number
+    this.isInitializing = false;
+    this.businessNumber = process.env.WHATSAPP_BUSINESS_NUMBER || '919876543210';
     this.sessionPath = path.join(__dirname, '../../.whatsapp-session');
     this.currentQR = null;
     this.currentQRText = null;
@@ -14,6 +15,19 @@ class WhatsAppService {
 
   async initialize() {
     try {
+      // Prevent multiple simultaneous initializations
+      if (this.isInitializing) {
+        console.log('⏳ WhatsApp initialization already in progress...');
+        return;
+      }
+
+      // If already ready, skip
+      if (this.isReady) {
+        console.log('✅ WhatsApp already ready, skipping initialization');
+        return;
+      }
+
+      this.isInitializing = true;
       console.log('🔄 Initializing WhatsApp Web...');
       
       this.client = new Client({
@@ -29,10 +43,8 @@ class WhatsAppService {
         console.log('QR Code Text:', qr);
         console.log('\nAlternatively, visit: http://localhost:3001/api/whatsapp/qr to see image');
         
-        // Store QR code for retrieval via API
         this.currentQRText = qr;
         
-        // Generate QR code image
         const qrcode = require('qrcode');
         qrcode.toBuffer(qr, { errorCorrectionLevel: 'H', width: 300 })
           .then(buffer => {
@@ -47,27 +59,36 @@ class WhatsAppService {
 
       this.client.on('auth_failure', (msg) => {
         console.error('❌ WhatsApp auth failed:', msg);
+        this.isInitializing = false;
       });
 
       this.client.on('ready', () => {
         this.isReady = true;
+        this.isInitializing = false;
         console.log('✅ WhatsApp Web is ready');
       });
 
       this.client.on('disconnected', (reason) => {
         this.isReady = false;
+        this.isInitializing = false;
         console.warn('⚠️ WhatsApp disconnected:', reason);
       });
 
       this.client.on('error', (error) => {
         console.error('❌ WhatsApp error:', error);
+        this.isInitializing = false;
       });
 
       await this.client.initialize();
       
     } catch (error) {
-      console.error('Failed to initialize WhatsApp:', error);
-      throw error;
+      this.isInitializing = false;
+      if (error.message && error.message.includes('already running')) {
+        console.warn('⚠️ WhatsApp browser already running, will use existing session');
+        this.isReady = true;
+      } else {
+        console.error('Failed to initialize WhatsApp:', error.message);
+      }
     }
   }
 

@@ -361,9 +361,13 @@
     async function checkWhatsAppStatus() {
       try {
         const response = await fetch('/api/whatsapp/status');
+        if (!response.ok) throw new Error('Status check failed');
+        
         const data = await response.json();
         
         const badge = document.getElementById('whatsappStatus');
+        if (!badge) return;
+        
         if (data.isReady) {
           badge.textContent = 'WhatsApp: Ready ✓';
           badge.className = 'status-badge active';
@@ -375,7 +379,11 @@
           badge.className = 'status-badge inactive';
         }
       } catch (error) {
-        document.getElementById('whatsappStatus').textContent = 'WhatsApp: Error';
+        const badge = document.getElementById('whatsappStatus');
+        if (badge) {
+          badge.textContent = 'WhatsApp: Checking...';
+          badge.className = 'status-badge inactive';
+        }
       }
     }
 

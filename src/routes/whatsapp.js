@@ -185,12 +185,29 @@ router.post('/delivery-link', async (req, res) => {
  */
 router.post('/initialize', async (req, res) => {
   try {
+    const status = whatsappService.getStatus();
+    
+    if (status.isReady) {
+      return res.json({ 
+        message: 'WhatsApp is already ready and authenticated',
+        status: 'ready'
+      });
+    }
+
     await whatsappService.initialize();
-    res.json({ 
-      message: 'WhatsApp initialization started. Check console for QR code.' 
-    });
+    
+    setTimeout(() => {
+      const updatedStatus = whatsappService.getStatus();
+      res.json({ 
+        message: 'WhatsApp initialization started',
+        status: updatedStatus.isReady ? 'ready' : 'initializing'
+      });
+    }, 1000);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ 
+      message: error.message,
+      error: 'Check if WhatsApp browser is already running'
+    });
   }
 });
 
